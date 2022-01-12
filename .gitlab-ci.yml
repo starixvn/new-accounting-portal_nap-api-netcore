@@ -1,0 +1,5 @@
+include:
+  - project: "ci/repos-ci/olympus_nap_nap_api_netcore"
+    ref: master
+    file: "gitlab-ci.yml"
+    
