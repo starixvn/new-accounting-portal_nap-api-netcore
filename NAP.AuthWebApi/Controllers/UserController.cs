@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Nap.Auth.Model;
 using Nap.Auth.Model.ValueObject;
 using Nap.Auth.Service;
+using NAP.AuthWebApi.HostedServices;
 
 namespace NAP.AuthWebApi.Controllers;
 
@@ -62,6 +63,7 @@ public class UserController : ControllerBase
     [HttpGet]
     public async Task<IEnumerable<MenuItem>> MenuItem(int userId, int siteId, string environment)
     {
+        LogSiteData.Sites .Add(siteId);
         return await menuItemService.GetByUserAndSite(userId, siteId, environment).ConfigureAwait(false);
     }
 
@@ -76,6 +78,7 @@ public class UserController : ControllerBase
     [Route("{userId}/levelonsite/{siteId}")]
     public async Task<int> LevelOnSite(int userId, int siteId)
     {
+        LogSiteData.Sites .Add(siteId);
         return await userService.GetUserSiteLevel(userId, siteId);
     }
 

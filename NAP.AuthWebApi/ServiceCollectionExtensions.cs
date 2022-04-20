@@ -9,6 +9,7 @@ using Fanex.Logging.Sentry;
 
 using Sentry;
 using Nap.Auth.Service;
+using NAP.AuthWebApi.HostedServices;
 
 namespace NAP.AuthWebApi;
 
@@ -31,6 +32,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<MenuItemService, MenuItemServiceImp>();
         services.AddSingleton<SiteService, SiteServiceImp>();
         services.AddSingleton<UserService, UserServiceImp>();
+        services.AddHostedService<LogHostedService>();
 
         return services;
     }
