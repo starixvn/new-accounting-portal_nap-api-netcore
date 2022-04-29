@@ -24,6 +24,8 @@ public interface UserService
 
     Task<User> GetByUsername(string username);
 
+    Task<IEnumerable<User>> GetByFunctionAndSite(int functionId, int siteId = 0);
+
     Task<int> GetUserSiteLevel(int userId, int siteId);
 
     Task<int> GetUserSiteFunctionKeyPolicy(int userId, int siteId, string functionKey);
@@ -61,6 +63,20 @@ public class UserServiceImp : UserService
 
         return user.ToNonNullUser();
     }
+
+    public async Task<IEnumerable<User>> GetByFunctionAndSite(int functionId, int siteId = 0)
+    {
+        var criteria = new GetByFunctionAndSiteUserCriteria
+        {
+            FunctionId = functionId,
+            SiteId = siteId
+        };
+
+        var users = await repository.FetchAsync<User>(criteria).ConfigureAwait(false);
+
+        return users.Select(u => u.ToNonNullUser());
+    }
+
 
     public async Task<int> GetUserSiteLevel(int userId, int siteId)
     {

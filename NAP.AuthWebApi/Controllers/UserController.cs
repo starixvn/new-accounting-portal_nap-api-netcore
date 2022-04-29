@@ -78,4 +78,12 @@ public class UserController : ControllerBase
     {
         return await userService.GetUserSiteLevel(userId, siteId);
     }
+
+    [HttpGet]
+    [Route("byfunctionandsite")]
+    public async Task<IEnumerable<User>> LevelOnSite(string functionKey, int siteId)
+    {
+        var functionId = await functionService.GetByKeyAndSite(functionKey, siteId);
+        return await userService.GetByFunctionAndSite(functionId, siteId);
+    }
 }
