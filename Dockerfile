@@ -27,6 +27,14 @@ WORKDIR /app
 COPY --from=builder /app .
 COPY --from=builder /tools /tools
 
+# Don’t run as root
+RUN adduser --disabled-password \
+  --home /app \
+  --gecos '' dotnetuser && chown -R dotnetuser /app
+USER dotnetuser
+#
+
+
 ENV TZ="America/La_Paz" 
 
 ENTRYPOINT ["dotnet", "NAP.AuthWebApi.dll"]
