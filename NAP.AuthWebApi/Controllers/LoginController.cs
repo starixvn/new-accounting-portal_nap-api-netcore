@@ -19,7 +19,7 @@ public class LoginController : ControllerBase
     [HttpPost()]
     public async Task<int> Login([FromBody] UserCheckInUserCommand command)
     {
-        await userService.UserCheckIn(command).ConfigureAwait(false);
+        await userService.UserCheckInAsync(command).ConfigureAwait(false);
 
         return command.OnUserId;
     }

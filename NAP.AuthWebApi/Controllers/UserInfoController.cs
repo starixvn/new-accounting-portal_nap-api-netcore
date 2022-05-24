@@ -19,6 +19,6 @@ public class UserInfoController : ControllerBase
     public async Task<bool> UpdatePassword(int siteId, int userId, string password)
     {
         var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
-        return await userService.ChangePassword(siteId, userId, password, ip).ConfigureAwait(false);
+        return await userService.ChangePasswordAsync(siteId, userId, password, ip).ConfigureAwait(false);
     }
 }

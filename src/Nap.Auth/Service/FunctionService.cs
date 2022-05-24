@@ -8,9 +8,9 @@ namespace Nap.Auth.Service;
 
 public interface FunctionService
 {
-    Task<IEnumerable<FunctionPolicy>> GetByUserAndSiteIncludeGroup(int userId, int siteId, string env = Constant.Uat);
+    Task<IEnumerable<FunctionPolicy>> GetByUserAndSiteIncludeGroupAsync(int userId, int siteId, string env = Constant.Uat);
 
-    Task<int> GetByKeyAndSite(string key, int siteId);
+    Task<int> GetByKeyAndSiteAsync(string key, int siteId);
 }
 
 public class FunctionServiceImp : FunctionService
@@ -23,7 +23,7 @@ public class FunctionServiceImp : FunctionService
         this.repository = repository;
     }
 
-    public async Task<IEnumerable<FunctionPolicy>> GetByUserAndSiteIncludeGroup(
+    public async Task<IEnumerable<FunctionPolicy>> GetByUserAndSiteIncludeGroupAsync(
         int userId,
         int siteId,
         string env = Constant.Uat)
@@ -67,7 +67,7 @@ public class FunctionServiceImp : FunctionService
         return function.ToNonNullFunction();
     }
 
-    public async Task<int> GetByKeyAndSite(string key, int siteId)
+    public async Task<int> GetByKeyAndSiteAsync(string key, int siteId)
     {
         var criteria = new GetByKeyAndSiteFunctionCriteria
         {

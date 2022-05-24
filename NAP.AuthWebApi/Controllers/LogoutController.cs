@@ -24,7 +24,7 @@ public class LogoutController : ControllerBase
             OnUserId = onUserId
         };
 
-        await userService.UserLogOut(command).ConfigureAwait(false);
+        await userService.UserLogOutAsync(command).ConfigureAwait(false);
 
         return 0;
     }

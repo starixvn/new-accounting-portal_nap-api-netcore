@@ -10,6 +10,7 @@ using Fanex.Logging.Sentry;
 using Sentry;
 using Nap.Auth.Service;
 using NAP.AuthWebApi.HostedServices;
+using ONEbook.OTP.Services;
 
 namespace NAP.AuthWebApi;
 
@@ -18,21 +19,22 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddCoreServices(this IServiceCollection services)
     {
-        services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-        services.AddSingleton<IDynamicRepository, DynamicRepository>();
-        services.AddSingleton<Fanex.Logging.ILogger, Logger>();
+        services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
+        services.AddTransient<IDynamicRepository, DynamicRepository>();
+        services.AddTransient<Fanex.Logging.ILogger, Logger>();
 
         return services;
     }
 
     public static IServiceCollection AddInternalServices(this IServiceCollection services)
     {
-        services.AddSingleton<FunctionService, FunctionServiceImp>();
-        services.AddSingleton<GroupService, GroupServiceImp>();
-        services.AddSingleton<MenuItemService, MenuItemServiceImp>();
-        services.AddSingleton<SiteService, SiteServiceImp>();
-        services.AddSingleton<UserService, UserServiceImp>();
-        services.AddHostedService<LogHostedService>();
+        services.AddTransient<FunctionService, FunctionServiceImp>();
+        services.AddTransient<GroupService, GroupServiceImp>();
+        services.AddTransient<MenuItemService, MenuItemServiceImp>();
+        services.AddTransient<SiteService, SiteServiceImp>();
+        services.AddTransient<UserService, UserServiceImp>();
+        services.AddTransient<OtpService, OtpServiceImpl>();
+        services.AddHostedService<LogHostedService>();        
 
         return services;
     }

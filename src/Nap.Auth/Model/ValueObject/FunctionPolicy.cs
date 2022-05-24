@@ -14,6 +14,8 @@ public class FunctionPolicy
 
     public string ParentKey { get; set; }
 
+    public string Description { get; set; }
+
     public FunctionPolicy ToNonNullFunctionPolicy()
     {
         return new FunctionPolicy
@@ -23,7 +25,8 @@ public class FunctionPolicy
             ParentId = ParentId,
             Name = StringUtility.ToNonNull(Name),
             Key = StringUtility.ToNonNull(Key),
-            ParentKey = StringUtility.ToNonNull(ParentKey)
+            ParentKey = StringUtility.ToNonNull(ParentKey),
+            Description = StringUtility.ToNonNull(Description)
         };
     }
 }

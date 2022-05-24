@@ -20,6 +20,6 @@ public class SiteController : ControllerBase
     [HttpGet()]
     public async Task<IEnumerable<MenuItem>> GetMenus(int siteId, string environment, bool ? isActive)
     {                
-        return await menuItemService.GetBySite(siteId, environment, isActive);
+        return await menuItemService.GetBySiteAsync(siteId, environment, isActive);
     }
 }

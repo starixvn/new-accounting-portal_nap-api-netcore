@@ -3,44 +3,54 @@ using Fanex.Logging;
 using Nap.Auth.Criteria.Trace;
 using Nap.Auth.Criteria.User;
 using Nap.Auth.Model;
+using ONEbook.OTP.Services;
 
 namespace Nap.Auth.Service;
 
 public interface UserService
 {
-    Task ReUserCheckIn(UserReCheckInUserCommand command);
+    Task ReUserCheckInAsync(UserReCheckInUserCommand command);
 
-    Task UserCheckIn(UserCheckInUserCommand command);
+    Task UserCheckInAsync(UserCheckInUserCommand command);
 
-    Task UserLogOut(LogOutUserCommand command);
+    Task UserLogOutAsync(LogOutUserCommand command);
 
-    Task UserSsoCheckIn(UserSSOCheckInUserCommand command);
+    Task UserSsoCheckInAsync(UserSSOCheckInUserCommand command);
 
-    Task<string> UserSsoGetTime();
+    Task<string> UserSsoGetTimeAsync();
 
-    Task<bool> ChangePassword(int siteId, int userId, string password, string loginIp);
+    Task<bool> ChangePasswordAsync(int siteId, int userId, string password, string loginIp);
 
-    Task<User> GetById(int id);
+    Task<User> GetByIdAsync(int id);
 
-    Task<User> GetByUsername(string username);
+    Task<User> GetByUsernameAsync(string username);
 
-    Task<IEnumerable<User>> GetByFunctionAndSite(int functionId, int siteId = 0);
+    Task<IEnumerable<User>> GetByFunctionAndSiteAsync(int functionId, int siteId = 0);
 
-    Task<int> GetUserSiteLevel(int userId, int siteId);
+    Task<int> GetUserSiteLevelAsync(int userId, int siteId);
 
-    Task<int> GetUserSiteFunctionKeyPolicy(int userId, int siteId, string functionKey);
+    Task<int> GetUserSiteFunctionKeyPolicyAsync(int userId, int siteId, string functionKey);
+
+    Task<bool> IgnoredOTPAsync(int userId, string system);
+
+    Task<bool> VerifyOTPAsync(int userId, string system, string otp);
+
+    Task<UserOTP> GetUserOTPAsync(int userId, string system);
 }
 
 public class UserServiceImp : UserService
 {
     private readonly IDynamicRepository repository;
 
-    public UserServiceImp(IDynamicRepository repository)
+    private readonly OtpService otpService;
+
+    public UserServiceImp(IDynamicRepository repository, OtpService otpService)
     {
         this.repository = repository;
+        this.otpService = otpService;
     }
 
-    public async Task<User> GetById(int id)
+    public async Task<User> GetByIdAsync(int id)
     {
         var criteria = new GetByIdUserCriteria
         {
@@ -52,7 +62,7 @@ public class UserServiceImp : UserService
         return user.ToNonNullUser();
     }
 
-    public async Task<User> GetByUsername(string username)
+    public async Task<User> GetByUsernameAsync(string username)
     {
         var criteria = new GetByUsernameUserCriteria
         {
@@ -64,7 +74,7 @@ public class UserServiceImp : UserService
         return user.ToNonNullUser();
     }
 
-    public async Task<IEnumerable<User>> GetByFunctionAndSite(int functionId, int siteId = 0)
+    public async Task<IEnumerable<User>> GetByFunctionAndSiteAsync(int functionId, int siteId = 0)
     {
         var criteria = new GetByFunctionAndSiteUserCriteria
         {
@@ -78,7 +88,7 @@ public class UserServiceImp : UserService
     }
 
 
-    public async Task<int> GetUserSiteLevel(int userId, int siteId)
+    public async Task<int> GetUserSiteLevelAsync(int userId, int siteId)
     {
         var criteria = new GetUserSiteLevelUserCriteria
         {
@@ -89,7 +99,7 @@ public class UserServiceImp : UserService
         return await repository.GetAsync<int>(criteria);
     }
 
-    public async Task<bool> ChangePassword(int siteId, int userId, string password, string loginIp)
+    public async Task<bool> ChangePasswordAsync(int siteId, int userId, string password, string loginIp)
     {
         var command = new UpdatePasswordCustomerCommand
         {
@@ -107,7 +117,7 @@ public class UserServiceImp : UserService
         return command.ErrCode == 0;
     }
 
-    public async Task UserCheckIn(UserCheckInUserCommand command)
+    public async Task UserCheckInAsync(UserCheckInUserCommand command)
     {
         if (!command.IsValid())
         {
@@ -118,23 +128,23 @@ public class UserServiceImp : UserService
         await InsertLogUserLogin(command).ConfigureAwait(false);
     }
 
-    public async Task ReUserCheckIn(UserReCheckInUserCommand command)
+    public async Task ReUserCheckInAsync(UserReCheckInUserCommand command)
     {
         await repository.ExecuteAsync(command).ConfigureAwait(false);
     }
 
-    public async Task UserLogOut(LogOutUserCommand command)
+    public async Task UserLogOutAsync(LogOutUserCommand command)
     {
         await repository.ExecuteAsync(command).ConfigureAwait(false);
     }
 
-    public async Task UserSsoCheckIn(UserSSOCheckInUserCommand command)
+    public async Task UserSsoCheckInAsync(UserSSOCheckInUserCommand command)
     {
         await repository.ExecuteAsync(command).ConfigureAwait(false);
         await InsertLogUserLogin(command).ConfigureAwait(false);
     }
 
-    public async Task<int> GetUserSiteFunctionKeyPolicy(int userId, int siteId, string functionKey)
+    public async Task<int> GetUserSiteFunctionKeyPolicyAsync(int userId, int siteId, string functionKey)
     {
         var criteria = new GetUserSiteFunctionKeyPolicyUserCriteria
         {
@@ -146,7 +156,7 @@ public class UserServiceImp : UserService
         return await repository.GetAsync<int>(criteria).ConfigureAwait(false);
     }
 
-    public async Task<string> UserSsoGetTime()
+    public async Task<string> UserSsoGetTimeAsync()
     {
         var command = new UserSsoGetTimeUserCommand
         {
@@ -207,5 +217,41 @@ public class UserServiceImp : UserService
         {
             await Logger.Log.ErrorAsync(ex.Message, ex).ConfigureAwait(false);
         }
+    }
+
+
+    public async Task<bool> IgnoredOTPAsync(int userId, string system)
+    {
+        var userOTP = await GetUserOTPAsync(userId, system);
+
+        return userOTP == null || userOTP.IgnoreOTP;
+    }
+
+    public async Task<bool> VerifyOTPAsync(int userId, string system, string otp)
+    {
+        var userOTP = await GetUserOTPAsync(userId, system);
+
+        if (userOTP == null || userOTP.IgnoreOTP)
+        {
+            return true;
+        }
+
+        if (string.IsNullOrEmpty(userOTP.SecretKey) || string.IsNullOrEmpty(otp))
+        {
+            return false;
+        }
+
+        return otpService.VerifyOtp(userOTP.SecretKey, otp);
+    }
+
+    public async Task<UserOTP> GetUserOTPAsync(int userId, string system)
+    {
+        var criteria = new UserGetOTPCriteria
+        {
+            CustId = userId,
+            System = system
+        };
+
+        return await repository.GetAsync<UserOTP>(criteria);
     }
 }
