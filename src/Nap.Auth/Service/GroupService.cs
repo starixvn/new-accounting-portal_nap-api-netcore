@@ -6,7 +6,7 @@ namespace Nap.Auth.Service;
 
 public interface GroupService
 {
-    Task<Group> GetById(int id);
+    Task<Group> GetByIdAsync(int id);
 }
 
 public class GroupServiceImp : GroupService
@@ -18,7 +18,7 @@ public class GroupServiceImp : GroupService
         this.repository = repository;
     }
 
-    public async Task<Group> GetById(int id)
+    public async Task<Group> GetByIdAsync(int id)
     {
         var criteria = new GetByIdGroupCriteria
         {

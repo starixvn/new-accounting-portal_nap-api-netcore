@@ -7,9 +7,9 @@ namespace Nap.Auth.Service;
 
 public interface MenuItemService
 {
-    Task<IEnumerable<MenuItem>> GetByUserAndSite(int userId, int siteId, string env = Constant.Uat);
+    Task<IEnumerable<MenuItem>> GetByUserAndSiteAsync(int userId, int siteId, string env = Constant.Uat);
 
-    Task<IEnumerable<MenuItem>> GetBySite(int siteId, string env = Constant.Uat, bool? isActive = null);
+    Task<IEnumerable<MenuItem>> GetBySiteAsync(int siteId, string env = Constant.Uat, bool? isActive = null);
 }
 
 public class MenuItemServiceImp : MenuItemService
@@ -21,7 +21,7 @@ public class MenuItemServiceImp : MenuItemService
         this.repository = repository;
     }
 
-    public async Task<IEnumerable<MenuItem>> GetBySite(int siteId, string env = "UAT", bool? isActive = null)
+    public async Task<IEnumerable<MenuItem>> GetBySiteAsync(int siteId, string env = "UAT", bool? isActive = null)
     {
         var criteria = new GetMenuItemBySiteCriteria
         {
@@ -35,7 +35,7 @@ public class MenuItemServiceImp : MenuItemService
         return menuItems.Select(m => m.ToNonNullMenuItem()).OrderBy(m => m.Name);
     }
 
-    public async Task<IEnumerable<MenuItem>> GetByUserAndSite(int userId, int siteId, string env = Constant.Uat)
+    public async Task<IEnumerable<MenuItem>> GetByUserAndSiteAsync(int userId, int siteId, string env = Constant.Uat)
     {
         var criteria = new GetByUserAndSiteIncludeGroupMenuItemCriteria
         {

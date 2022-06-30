@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Nap.Auth.Model;
 using Nap.Auth.Service;
+using NAP.AuthWebApi.HostedServices;
 
 namespace NAP.AuthWebApi.Controllers;
 
@@ -18,7 +19,7 @@ public class SiteController : ControllerBase
     [Route("{siteId}/menuItem")]
     [HttpGet()]
     public async Task<IEnumerable<MenuItem>> GetMenus(int siteId, string environment, bool ? isActive)
-    {
-        return await menuItemService.GetBySite(siteId, environment, isActive);
+    {                
+        return await menuItemService.GetBySiteAsync(siteId, environment, isActive);
     }
 }

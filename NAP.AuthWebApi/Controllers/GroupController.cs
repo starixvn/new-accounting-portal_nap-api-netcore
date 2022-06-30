@@ -19,6 +19,6 @@ public class GroupController : ControllerBase
     [HttpGet()]
     public async Task<Group> Get(int id)
     {
-        return await groupService.GetById(id).ConfigureAwait(false);
+        return await groupService.GetByIdAsync(id).ConfigureAwait(false);
     }
 }

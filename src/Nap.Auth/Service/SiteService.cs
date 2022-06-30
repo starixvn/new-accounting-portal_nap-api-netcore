@@ -8,9 +8,9 @@ namespace Nap.Auth.Service;
 
 public interface SiteService
 {
-    Task<Site> GetById(int id);
+    Task<Site> GetByIdAsync(int id);
 
-    Task<IEnumerable<SiteLevel>> GetSiteLevelByUser(int userId, string env = Constant.Uat);
+    Task<IEnumerable<SiteLevel>> GetSiteLevelByUserAsync(int userId, string env = Constant.Uat);
 }
 
 public class SiteServiceImp : SiteService
@@ -22,7 +22,7 @@ public class SiteServiceImp : SiteService
         this.repository = repository;
     }
 
-    public async Task<Site> GetById(int id)
+    public async Task<Site> GetByIdAsync(int id)
     {
         var criteria = new GetByIdSiteCriteria
         {
@@ -34,7 +34,7 @@ public class SiteServiceImp : SiteService
         return site != null ? site.ToNonNullSite() : null;
     }
 
-    public async Task<IEnumerable<SiteLevel>> GetSiteLevelByUser(int userId, string env = Constant.Uat)
+    public async Task<IEnumerable<SiteLevel>> GetSiteLevelByUserAsync(int userId, string env = Constant.Uat)
     {
         var criteria = new GetByUserSiteCriteria
         {

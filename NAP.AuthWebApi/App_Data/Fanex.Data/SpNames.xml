@@ -14,6 +14,11 @@
       <Mapping DataField="FunctionName" ObjectProperty="Name" />
       <Mapping DataField="FunctionKey" ObjectProperty="Key" />
     </Setting>
+    <Setting Key="NAP_Function_GetByKeyAndSite" SpName="NAP_Function_GetByKeyAndSite" DbName="DBPOL.NAP_UserControl.bodbPolicyNetView">
+      <Mapping DataField="FunctionId" ObjectProperty="Id" />
+      <Mapping DataField="FunctionName" ObjectProperty="Name" />
+      <Mapping DataField="FunctionKey" ObjectProperty="Key" />
+    </Setting>
   </Function>
   <Function Name="Group">
     <Setting Key="NAP_Group_GetById" SpName="NAP_Group_GetById" DbName="DBPOL.NAP_UserControl.bodbPolicyNetView">
@@ -32,7 +37,10 @@
       <Mapping DataField="SiteId" ObjectProperty="Id" />
       <Mapping DataField="SiteName" ObjectProperty="Name" />
     </Setting>
-    <Setting Key="NAP_Site_GetByUser" SpName="NAP_Site_GetByUser" DbName="DBPOL.NAP_UserControl.bodbPolicyNetView">
+    <Setting Key="NAP_Site_GetByUser" SpName="NAP_Site_GetByUser" DbName="DBPOL.NAP_UserControl.bodbPolicyNetView" />
+    <Setting Key="NAP_MenuItem_GetBySite" SpName="NAP_MenuItem_GetBySite" DbName="DBPOL.NAP_UserControl.bodbPolicyNetView">
+      <Mapping DataField="MenuItemId" ObjectProperty="Id" />
+      <Mapping DataField="MenuItemName" ObjectProperty="Name" />
     </Setting>
   </Function>
   <Function Name="User">
@@ -52,8 +60,13 @@
     <Setting Key="NAP_User_GetUserSiteFunctionKeyPolicy" SpName="NAP_User_GetUserSiteFunctionKeyPolicy" DbName="DBPOL.NAP_UserControl.bodbPolicyNetView" />
 
     <Setting Key="NAP_User_SSOGetTime" SpName="NAP_User_SSOGetTime" DbName="DBPOL.NAP_UserControl.bodbPolicyNetView" />
+    <Setting Key="NAP_User_GetUserByFunctionAndSite" SpName="NAP_User_GetUserByFunctionAndSite" DbName="DBPOL.NAP_UserControl.bodbPolicyNetView">
+      <Mapping DataField="UserId" ObjectProperty="Id" />
+      <Mapping DataField="userpwd" ObjectProperty="Password" />
+    </Setting>
   </Function>
   <Function Name="LogUserLogin">
     <Setting Key="NAP_LogUserLogin_Insert" SpName="NAP_LogUserLogin_Insert" DbName="DBNAP.bodb_NAPLOG.bodbAdminNet" />
+    <Setting Key="NAP_Admin_GetOTP" SpName="NAP_Admin_GetOTP" DbName="DBPOL.NAP_UserControl.bodbAdminNet" />
   </Function>
 </Functions>

@@ -20,7 +20,7 @@ public class SsoLoginController : ControllerBase
     [HttpGet()]
     public async Task<string> GetTime()
     {
-        var time = await _userService.UserSsoGetTime().ConfigureAwait(false);
+        var time = await _userService.UserSsoGetTimeAsync().ConfigureAwait(false);
         return JsonConvert.SerializeObject(time);
     }
 
@@ -28,7 +28,7 @@ public class SsoLoginController : ControllerBase
     [HttpPost()]
     public async Task<int> Login([FromBody] UserSSOCheckInUserCommand command)
     {
-        await _userService.UserSsoCheckIn(command).ConfigureAwait(false);
+        await _userService.UserSsoCheckInAsync(command).ConfigureAwait(false);
 
         return command.OnUserId > 0 ? command.OnUserId : command.CheckOnUserId;
     }

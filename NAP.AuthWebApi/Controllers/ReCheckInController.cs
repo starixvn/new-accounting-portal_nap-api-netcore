@@ -25,7 +25,7 @@ public class ReCheckInController : ControllerBase
     [HttpGet()]
     public async Task<int> Get(int onUserId, int siteId)
     {
-        var siteStatus = (await siteService.GetById(siteId).ConfigureAwait(false)).IsActive;
+        var siteStatus = (await siteService.GetByIdAsync(siteId).ConfigureAwait(false)).IsActive;
 
         if (!siteStatus)
         {
@@ -37,7 +37,7 @@ public class ReCheckInController : ControllerBase
             OnUserId = onUserId
         };
 
-        await userService.ReUserCheckIn(criteria).ConfigureAwait(false);
+        await userService.ReUserCheckInAsync(criteria).ConfigureAwait(false);
 
         if (criteria.IsKickedOut)
         {
