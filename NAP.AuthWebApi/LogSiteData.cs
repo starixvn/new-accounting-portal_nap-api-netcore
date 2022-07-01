@@ -1,4 +1,4 @@
-namespace NAP.AuthWebApi.HostedServices;
+namespace NAP.AuthWebApi;
 
 public static class LogSiteData
 {

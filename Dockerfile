@@ -24,6 +24,7 @@ WORKDIR /app
 
 COPY --from=builder /app .
 
+RUN apt-get update
 RUN apt-get install -y nano 
     
 # Don’t run as root

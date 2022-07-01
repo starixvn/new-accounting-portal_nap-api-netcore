@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Nap.Auth.Model;
 using Nap.Auth.Model.ValueObject;
 using Nap.Auth.Service;
-using NAP.AuthWebApi.HostedServices;
 
 namespace NAP.AuthWebApi.Controllers;
 

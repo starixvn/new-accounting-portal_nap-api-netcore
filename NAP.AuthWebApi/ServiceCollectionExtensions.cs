@@ -9,7 +9,6 @@ using Fanex.Logging.Sentry;
 
 using Sentry;
 using Nap.Auth.Service;
-using NAP.AuthWebApi.HostedServices;
 using ONEbook.OTP.Services;
 
 namespace NAP.AuthWebApi;
@@ -34,7 +33,6 @@ public static class ServiceCollectionExtensions
         services.AddTransient<SiteService, SiteServiceImp>();
         services.AddTransient<UserService, UserServiceImp>();
         services.AddTransient<OtpService, OtpServiceImpl>();
-        services.AddHostedService<LogHostedService>();        
 
         return services;
     }
