@@ -62,7 +62,6 @@ public class UserController : ControllerBase
     [HttpGet]
     public async Task<IEnumerable<MenuItem>> MenuItem(int userId, int siteId, string environment)
     {
-        LogSiteData.Sites.Add(siteId);
         return await menuItemService.GetByUserAndSiteAsync(userId, siteId, environment).ConfigureAwait(false);
     }
 
@@ -77,7 +76,6 @@ public class UserController : ControllerBase
     [Route("{userId}/levelonsite/{siteId}")]
     public async Task<int> LevelOnSite(int userId, int siteId)
     {
-        LogSiteData.Sites.Add(siteId);
         return await userService.GetUserSiteLevelAsync(userId, siteId);
     }
 
