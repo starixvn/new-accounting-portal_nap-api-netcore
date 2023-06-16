@@ -1,6 +1,6 @@
 namespace Nap.Auth.Model;
 
-public class UserOTP
+public class UserOtp
 {
     public int CustId { get; set; }
 
@@ -8,7 +8,7 @@ public class UserOTP
 
     public string SecretKey { get; set; }
 
-    public bool IgnoreOTP { get; set; }
+    public bool IgnoreOtp { get; set; }
 
     public string System { get; set; }
 }

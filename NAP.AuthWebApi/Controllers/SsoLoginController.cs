@@ -9,26 +9,26 @@ namespace NAP.AuthWebApi.Controllers;
 [Route("[controller]")]
 public class SsoLoginController : ControllerBase
 {
-    private readonly UserService _userService;
+    private readonly UserService userService;
 
     public SsoLoginController(UserService userService)
     {
-        _userService = userService;
+        this.userService = userService;
     }
 
     [Route("")]
-    [HttpGet()]
+    [HttpGet]
     public async Task<string> GetTime()
     {
-        var time = await _userService.UserSsoGetTimeAsync().ConfigureAwait(false);
+        var time = await userService.UserSsoGetTimeAsync().ConfigureAwait(false);
         return JsonConvert.SerializeObject(time);
     }
 
     [Route("")]
-    [HttpPost()]
-    public async Task<int> Login([FromBody] UserSSOCheckInUserCommand command)
+    [HttpPost]
+    public async Task<int> Login([FromBody] UserSsoCheckInUserCommand command)
     {
-        await _userService.UserSsoCheckInAsync(command).ConfigureAwait(false);
+        await userService.UserSsoCheckInAsync(command).ConfigureAwait(false);
 
         return command.OnUserId > 0 ? command.OnUserId : command.CheckOnUserId;
     }

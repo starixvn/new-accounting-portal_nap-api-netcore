@@ -44,7 +44,7 @@ public class FunctionServiceImp : FunctionService
         return functionPolicies;
     }
 
-    private async Task AssignParentFunctionKey(List<FunctionPolicy> functionPolicies)
+    private async Task AssignParentFunctionKey(IEnumerable<FunctionPolicy> functionPolicies)
     {
         var childFunctionPolicies = functionPolicies.Where(f => f.ParentId > 0);
         foreach (var functionPolicy in childFunctionPolicies)
@@ -76,6 +76,6 @@ public class FunctionServiceImp : FunctionService
         };
 
         var function = await repository.GetAsync<Function>(criteria);
-        return function == null ? 0 : function.Id;
+        return function?.Id ?? 0;
     }
 }

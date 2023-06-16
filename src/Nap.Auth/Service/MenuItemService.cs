@@ -30,7 +30,7 @@ public class MenuItemServiceImp : MenuItemService
             IsActive = isActive
         };
 
-        var menuItems = (await repository.FetchAsync<MenuItem>(criteria).ConfigureAwait(false));
+        var menuItems = await repository.FetchAsync<MenuItem>(criteria).ConfigureAwait(false);
 
         return menuItems.Select(m => m.ToNonNullMenuItem()).OrderBy(m => m.Name);
     }
@@ -44,7 +44,7 @@ public class MenuItemServiceImp : MenuItemService
             Environment = env
         };
 
-        var menuItems = (await repository.FetchAsync<MenuItem>(criteria).ConfigureAwait(false));
+        var menuItems = await repository.FetchAsync<MenuItem>(criteria).ConfigureAwait(false);
 
         return menuItems.Select(m => m.ToNonNullMenuItem()).OrderBy(m => m.Name);
     }

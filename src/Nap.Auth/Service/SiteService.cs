@@ -31,7 +31,7 @@ public class SiteServiceImp : SiteService
 
         var site = await repository.GetAsync<Site>(criteria).ConfigureAwait(false);
 
-        return site != null ? site.ToNonNullSite() : null;
+        return site?.ToNonNullSite();
     }
 
     public async Task<IEnumerable<SiteLevel>> GetSiteLevelByUserAsync(int userId, string env = Constant.Uat)

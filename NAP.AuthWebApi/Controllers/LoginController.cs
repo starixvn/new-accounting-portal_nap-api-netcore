@@ -16,7 +16,7 @@ public class LoginController : ControllerBase
     }
 
     [Route("")]
-    [HttpPost()]
+    [HttpPost]
     public async Task<int> Login([FromBody] UserCheckInUserCommand command)
     {
         await userService.UserCheckInAsync(command).ConfigureAwait(false);

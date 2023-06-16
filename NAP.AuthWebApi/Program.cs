@@ -9,8 +9,8 @@ using Newtonsoft.Json;
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
     ApplicationName = typeof(Program).Assembly.FullName,
-    ContentRootPath = Directory.GetCurrentDirectory(),
-    
+    ContentRootPath = Directory.GetCurrentDirectory()
+
 });
 
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);

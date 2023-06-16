@@ -3,7 +3,7 @@ using Fanex.Data;
 using Fanex.Data.Repository;
 namespace Nap.Auth.Criteria.User;
 
-public class UserSSOCheckInUserCommand : NonQueryCommand
+public class UserSsoCheckInUserCommand : NonQueryCommand
 {
     public int UserId { get; set; }
 
