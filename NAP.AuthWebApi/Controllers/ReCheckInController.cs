@@ -22,7 +22,7 @@ public class ReCheckInController : ControllerBase
     }
 
     [Route("")]
-    [HttpGet()]
+    [HttpGet]
     public async Task<int> Get(int onUserId, int siteId)
     {
         var siteStatus = (await siteService.GetByIdAsync(siteId).ConfigureAwait(false)).IsActive;

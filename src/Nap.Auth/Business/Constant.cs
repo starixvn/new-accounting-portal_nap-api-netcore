@@ -4,7 +4,7 @@ public static class Constant
 {
     public const string Uat = "UAT";
     public const string Live = "LIVE";
-    public const string IT = "IT";
+    public const string It = "IT";
 
     public enum ReCheckInResult
     {

@@ -7,6 +7,8 @@ using ONEbook.OTP.Services;
 
 namespace Nap.Auth.Service;
 
+using System.Globalization;
+
 public interface UserService
 {
     Task ReUserCheckInAsync(UserReCheckInUserCommand command);
@@ -15,7 +17,7 @@ public interface UserService
 
     Task UserLogOutAsync(LogOutUserCommand command);
 
-    Task UserSsoCheckInAsync(UserSSOCheckInUserCommand command);
+    Task UserSsoCheckInAsync(UserSsoCheckInUserCommand command);
 
     Task<string> UserSsoGetTimeAsync();
 
@@ -31,11 +33,11 @@ public interface UserService
 
     Task<int> GetUserSiteFunctionKeyPolicyAsync(int userId, int siteId, string functionKey);
 
-    Task<bool> IgnoredOTPAsync(int userId, string system);
+    Task<bool> IgnoredOtpAsync(int userId, string system);
 
-    Task<bool> VerifyOTPAsync(int userId, string system, string otp);
+    Task<bool> VerifyOtpAsync(int userId, string system, string otp);
 
-    Task<UserOTP> GetUserOTPAsync(int userId, string system);
+    Task<UserOtp> GetUserOtpAsync(int userId, string system);
 }
 
 public class UserServiceImp : UserService
@@ -138,7 +140,7 @@ public class UserServiceImp : UserService
         await repository.ExecuteAsync(command).ConfigureAwait(false);
     }
 
-    public async Task UserSsoCheckInAsync(UserSSOCheckInUserCommand command)
+    public async Task UserSsoCheckInAsync(UserSsoCheckInUserCommand command)
     {
         await repository.ExecuteAsync(command).ConfigureAwait(false);
         await InsertLogUserLogin(command).ConfigureAwait(false);
@@ -165,7 +167,7 @@ public class UserServiceImp : UserService
 
         await repository.ExecuteAsync(command).ConfigureAwait(false);
 
-        return command.Time.ToString();
+        return command.Time.ToString(CultureInfo.InvariantCulture);
     }
 
     private async Task InsertLogUserLogin(UserCheckInUserCommand command)
@@ -187,7 +189,7 @@ public class UserServiceImp : UserService
         await ExecuteLoginLogCommand(logCommand).ConfigureAwait(false);
     }
 
-    private async Task InsertLogUserLogin(UserSSOCheckInUserCommand command)
+    private async Task InsertLogUserLogin(UserSsoCheckInUserCommand command)
     {
         var logCommand = new InsertLogUserLoginCommand
         {
@@ -206,7 +208,7 @@ public class UserServiceImp : UserService
         await ExecuteLoginLogCommand(logCommand).ConfigureAwait(false);
     }
 
-    private async Task ExecuteLoginLogCommand(InsertLogUserLoginCommand logCommand)
+    private async Task ExecuteLoginLogCommand(INonQueryCommand logCommand)
     {
         try
         {
@@ -220,38 +222,38 @@ public class UserServiceImp : UserService
     }
 
 
-    public async Task<bool> IgnoredOTPAsync(int userId, string system)
+    public async Task<bool> IgnoredOtpAsync(int userId, string system)
     {
-        var userOTP = await GetUserOTPAsync(userId, system);
+        var userOtp = await GetUserOtpAsync(userId, system);
 
-        return userOTP == null || userOTP.IgnoreOTP;
+        return userOtp == null || userOtp.IgnoreOtp;
     }
 
-    public async Task<bool> VerifyOTPAsync(int userId, string system, string otp)
+    public async Task<bool> VerifyOtpAsync(int userId, string system, string otp)
     {
-        var userOTP = await GetUserOTPAsync(userId, system);
+        var userOtp = await GetUserOtpAsync(userId, system);
 
-        if (userOTP == null || userOTP.IgnoreOTP)
+        if (userOtp == null || userOtp.IgnoreOtp)
         {
             return true;
         }
 
-        if (string.IsNullOrEmpty(userOTP.SecretKey) || string.IsNullOrEmpty(otp))
+        if (string.IsNullOrEmpty(userOtp.SecretKey) || string.IsNullOrEmpty(otp))
         {
             return false;
         }
 
-        return otpService.VerifyOtp(userOTP.SecretKey, otp);
+        return otpService.VerifyOtp(userOtp.SecretKey, otp);
     }
 
-    public async Task<UserOTP> GetUserOTPAsync(int userId, string system)
+    public async Task<UserOtp> GetUserOtpAsync(int userId, string system)
     {
-        var criteria = new UserGetOTPCriteria
+        var criteria = new UserGetOtpCriteria
         {
             CustId = userId,
             System = system
         };
 
-        return await repository.GetAsync<UserOTP>(criteria);
+        return await repository.GetAsync<UserOtp>(criteria);
     }
 }

@@ -5,14 +5,13 @@ using Fanex.Logging;
 using Fanex.Logging.Extensions;
 using Fanex.Logging.Extensions.AspNetCore;
 using Fanex.Logging.Extensions.Database;
-using Fanex.Logging.Sentry;
-
-using Sentry;
 using Nap.Auth.Service;
-using NAP.AuthWebApi.HostedServices;
 using ONEbook.OTP.Services;
 
 namespace NAP.AuthWebApi;
+
+using Fanex.Logging.Sentry.RavenClient;
+using SharpRaven;
 
 public static class ServiceCollectionExtensions
 {
@@ -34,7 +33,6 @@ public static class ServiceCollectionExtensions
         services.AddTransient<SiteService, SiteServiceImp>();
         services.AddTransient<UserService, UserServiceImp>();
         services.AddTransient<OtpService, OtpServiceImpl>();
-        services.AddHostedService<LogHostedService>();        
 
         return services;
     }

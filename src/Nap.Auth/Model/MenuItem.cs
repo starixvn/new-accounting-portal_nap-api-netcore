@@ -20,9 +20,9 @@ public class MenuItem
     {
         get
         {
-            if (!string.IsNullOrEmpty(this.Url))
+            if (!string.IsNullOrEmpty(Url))
             {
-                return this.Url.StartsWith("/", StringComparison.CurrentCulture) ? "~" + this.Url : this.Url;
+                return Url.StartsWith("/", StringComparison.CurrentCulture) ? "~" + Url : Url;
             }
 
             return "/";

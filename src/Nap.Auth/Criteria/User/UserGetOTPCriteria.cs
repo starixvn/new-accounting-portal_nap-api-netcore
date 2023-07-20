@@ -1,7 +1,7 @@
 using Fanex.Data.Repository;
 namespace Nap.Auth.Criteria.User;
 
-public class UserGetOTPCriteria : CriteriaBase
+public class UserGetOtpCriteria : CriteriaBase
 {
     public int CustId { get; set; }
 

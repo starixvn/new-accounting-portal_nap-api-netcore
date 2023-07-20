@@ -15,8 +15,8 @@ public class LogoutController : ControllerBase
         this.userService = userService;
     }
 
-    [Route("{onUserId}")]
-    [HttpGet()]
+    [Route("{onUserId:int}")]
+    [HttpGet]
     public async Task<int> Logout(int onUserId)
     {
         var command = new LogOutUserCommand

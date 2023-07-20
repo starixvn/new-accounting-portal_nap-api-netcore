@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Nap.Auth.Model;
 using Nap.Auth.Model.ValueObject;
 using Nap.Auth.Service;
-using NAP.AuthWebApi.HostedServices;
 
 namespace NAP.AuthWebApi.Controllers;
 
@@ -27,7 +26,7 @@ public class UserController : ControllerBase
         this.functionService = functionService;
     }
 
-    [Route("{id}")]
+    [Route("{id:int}")]
     [HttpGet]
     public async Task<User> Get(int id)
     {
@@ -41,14 +40,14 @@ public class UserController : ControllerBase
         return await userService.GetByUsernameAsync(username).ConfigureAwait(false);
     }
 
-    [Route("{userId}/permission")]
+    [Route("{userId:int}/permission")]
     [HttpGet]
     public async Task<int> GetPermission(int userId, int siteId, string functionKey)
     {
         return await userService.GetUserSiteFunctionKeyPolicyAsync(userId, siteId, functionKey).ConfigureAwait(false);
     }
 
-    [Route("{userId}/permissions")]
+    [Route("{userId:int}/permissions")]
     [HttpGet]
     public async Task<IEnumerable<FunctionPolicy>> FunctionPolicies(int userId, int siteId, string parentFunctionKey, string environment)
     {
@@ -59,15 +58,14 @@ public class UserController : ControllerBase
             functionPolicies.Where(f => f.ParentKey == parentFunctionKey);
     }
 
-    [Route("{userId}/menuItem")]
+    [Route("{userId:int}/menuItem")]
     [HttpGet]
     public async Task<IEnumerable<MenuItem>> MenuItem(int userId, int siteId, string environment)
     {
-        LogSiteData.Sites.Add(siteId);
         return await menuItemService.GetByUserAndSiteAsync(userId, siteId, environment).ConfigureAwait(false);
     }
 
-    [Route("{userId}/sitelevel")]
+    [Route("{userId:int}/sitelevel")]
     [HttpGet]
     public async Task<IEnumerable<SiteLevel>> SiteLevel(int userId, string environment)
     {
@@ -75,10 +73,9 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    [Route("{userId}/levelonsite/{siteId}")]
+    [Route("{userId:int}/levelonsite/{siteId:int}")]
     public async Task<int> LevelOnSite(int userId, int siteId)
     {
-        LogSiteData.Sites.Add(siteId);
         return await userService.GetUserSiteLevelAsync(userId, siteId);
     }
 
@@ -91,23 +88,23 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    [Route("{userId}/verify-otp")]
-    public async Task<bool> VerifyOTP(int userId, string system, string otp)
+    [Route("{userId:int}/verify-otp")]
+    public async Task<bool> VerifyOtp(int userId, string system, string otp)
     {
-        return await userService.VerifyOTPAsync(userId, system, otp);
+        return await userService.VerifyOtpAsync(userId, system, otp);
     }
 
     [HttpGet]
-    [Route("{userId}/ignored-otp")]
-    public async Task<bool> IgnoredOTP(int userId, string system)
+    [Route("{userId:int}/ignored-otp")]
+    public async Task<bool> IgnoredOtp(int userId, string system)
     {
-        return await userService.IgnoredOTPAsync(userId, system);
+        return await userService.IgnoredOtpAsync(userId, system);
     }
 
     [HttpGet]
-    [Route("{userId}/otp")]
-    public async Task<UserOTP> GetUserOTP(int userId, string system)
+    [Route("{userId:int}/otp")]
+    public async Task<UserOtp> GetUserOtp(int userId, string system)
     {
-        return await userService.GetUserOTPAsync(userId, system);
+        return await userService.GetUserOtpAsync(userId, system);
     }
 }

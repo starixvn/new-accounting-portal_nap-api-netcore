@@ -27,6 +27,6 @@ public class GroupServiceImp : GroupService
 
         var group = await repository.GetAsync<Group>(criteria).ConfigureAwait(false);
 
-        return group != null ? group.ToNonNullGroup() : null;
+        return group?.ToNonNullGroup();
     }
 }
