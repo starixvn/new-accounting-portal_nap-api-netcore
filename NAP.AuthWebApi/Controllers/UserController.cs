@@ -40,6 +40,13 @@ public class UserController : ControllerBase
         return await userService.GetByUsernameAsync(username).ConfigureAwait(false);
     }
 
+    [HttpGet]
+    [Route("bysite")]
+    public async Task<IEnumerable<User>> GetBySite(int siteId, bool? isActive)
+    {
+        return await userService.GetBySiteAsync(siteId, isActive).ConfigureAwait(false);
+    }
+
     [Route("{userId:int}/permission")]
     [HttpGet]
     public async Task<int> GetPermission(int userId, int siteId, string functionKey)

@@ -29,6 +29,8 @@ public interface UserService
 
     Task<IEnumerable<User>> GetByFunctionAndSiteAsync(int functionId, int siteId = 0);
 
+    Task<IEnumerable<User>> GetBySiteAsync(int siteId = 0, bool ?isActive = true);
+
     Task<int> GetUserSiteLevelAsync(int userId, int siteId);
 
     Task<int> GetUserSiteFunctionKeyPolicyAsync(int userId, int siteId, string functionKey);
@@ -82,6 +84,19 @@ public class UserServiceImp : UserService
         {
             FunctionId = functionId,
             SiteId = siteId
+        };
+
+        var users = await repository.FetchAsync<User>(criteria).ConfigureAwait(false);
+
+        return users.Select(u => u.ToNonNullUser());
+    }
+
+    public async Task<IEnumerable<User>> GetBySiteAsync(int siteId = 0, bool? isActive= null)
+    {
+        var criteria = new GetBySiteCriteria
+        {
+            SiteId = siteId,
+            IsActive = isActive
         };
 
         var users = await repository.FetchAsync<User>(criteria).ConfigureAwait(false);
