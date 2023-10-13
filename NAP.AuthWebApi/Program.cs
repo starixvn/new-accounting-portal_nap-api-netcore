@@ -1,22 +1,17 @@
 using System.Net.Mime;
 using Fanex.Data;
+using Fanex.Data.SqlServer;
 using Fanex.Logging.Extensions.Database;
 using Microsoft.AspNetCore.Diagnostics;
 using NAP.AuthWebApi;
 using Newtonsoft.Json;
 
 
-var builder = WebApplication.CreateBuilder(new WebApplicationOptions
-{
-    ApplicationName = typeof(Program).Assembly.FullName,
-    ContentRootPath = Directory.GetCurrentDirectory()
-
-});
-
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddCoreServices();
+builder.Services.AddFanexSql(builder.Configuration);
 builder.Services.AddFanexServices(builder.Configuration);
 builder.Services.AddInternalServices();
 builder.Services.AddControllers();
@@ -50,4 +45,4 @@ app.UseExceptionHandler(exceptionHandlerApp =>
 });
 app.MapControllers();
 
-await app.RunAsync("http://0.0.0.0:5000");
+app.Run();

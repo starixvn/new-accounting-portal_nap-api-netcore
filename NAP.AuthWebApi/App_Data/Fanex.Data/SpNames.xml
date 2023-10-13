@@ -52,6 +52,10 @@
       <Mapping DataField="UserId" ObjectProperty="Id" />
       <Mapping DataField="userpwd" ObjectProperty="Password" />
     </Setting>
+    <Setting Key="NAP_User_GetBySite" SpName="NAP_User_GetBySite" DbName="DBPOL.NAP_UserControl.bodbAdminNet">
+      <Mapping DataField="UserId" ObjectProperty="Id" />
+      <Mapping DataField="userpwd" ObjectProperty="Password" />
+    </Setting>
     <Setting Key="NAP_User_GetUserSiteLevel" SpName="NAP_User_GetUserSiteLevel" DbName="DBPOL.NAP_UserControl.bodbPolicyNetView" />
     <Setting Key="NAP_User_CheckIn" SpName="NAP_User_CheckIn" DbName="DBPOL.NAP_UserControl.bodbPolicyNetView" />
     <Setting Key="NAP_User_ReCheckIn" SpName="NAP_User_ReCheckIn" DbName="DBPOL.NAP_UserControl.bodbPolicyNetView" />
