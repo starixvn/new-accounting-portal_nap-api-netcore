@@ -1,6 +1,4 @@
-using Fanex.Data;
 using Fanex.Data.Repository;
-using Fanex.Data.SqlServer;
 using Fanex.Logging;
 using Fanex.Logging.Extensions;
 using Fanex.Logging.Extensions.AspNetCore;
@@ -39,22 +37,6 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddFanexServices(this IServiceCollection services, IConfiguration configuration)
     {
-        var connections = configuration.GetSection("ConnectionStrings")
-                               .GetChildren()
-                               .AsEnumerable()
-                               .ToDictionary(
-                                        x => x.GetValue<string>("Name"),
-                                        y => new ConnectionConfiguration(y.GetValue<string>("Name"), y.GetValue<string>("ConnectionString"), y.GetValue<string>("ProviderName"))
-                                );
-        var spFilePath = configuration.GetValue<string>("StoredProcedurePath");
-
-        DbSettingProviderManager
-          .StartNewSession()
-          .Use(connections)
-          .WithSqlServer()
-          .UseDefaultDbSettingProvider(resourcePath: spFilePath)
-          .Run();
-
         LogManager
         .SetDefaultLogCategory(configuration.GetSection("LogCategory").Value)
         .Use(new List<ILogEngine>
