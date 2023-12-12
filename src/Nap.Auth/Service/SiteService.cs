@@ -13,15 +13,8 @@ public interface SiteService
     Task<IEnumerable<SiteLevel>> GetSiteLevelByUserAsync(int userId, string env = Constant.Uat);
 }
 
-public class SiteServiceImp : SiteService
+public class SiteServiceImp(IDynamicRepository repository) : SiteService
 {
-    private readonly IDynamicRepository repository;
-
-    public SiteServiceImp(IDynamicRepository repository)
-    {
-        this.repository = repository;
-    }
-
     public async Task<Site> GetByIdAsync(int id)
     {
         var criteria = new GetByIdSiteCriteria

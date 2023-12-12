@@ -6,15 +6,8 @@ namespace NAP.AuthWebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class LogoutController : ControllerBase
+public class LogoutController(UserService userService) : ControllerBase
 {
-    private readonly UserService userService;
-
-    public LogoutController(UserService userService)
-    {
-        this.userService = userService;
-    }
-
     [Route("{onUserId:int}")]
     [HttpGet]
     public async Task<int> Logout(int onUserId)

@@ -6,15 +6,8 @@ namespace NAP.AuthWebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class LoginController : ControllerBase
+public class LoginController(UserService userService) : ControllerBase
 {
-    private readonly UserService userService;
-
-    public LoginController(UserService userService)
-    {
-        this.userService = userService;
-    }
-
     [Route("")]
     [HttpPost]
     public async Task<int> Login([FromBody] UserCheckInUserCommand command)
