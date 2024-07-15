@@ -8,6 +8,7 @@ using ONEbook.OTP.Services;
 namespace Nap.Auth.Service;
 
 using System.Globalization;
+using Microsoft.Extensions.Configuration;
 
 public interface UserService
 {
@@ -29,7 +30,7 @@ public interface UserService
 
     Task<IEnumerable<User>> GetByFunctionAndSiteAsync(int functionId, int siteId = 0);
 
-    Task<IEnumerable<User>> GetBySiteAsync(int siteId = 0, bool ?isActive = true);
+    Task<IEnumerable<User>> GetBySiteAsync(int siteId = 0, bool? isActive = true);
 
     Task<int> GetUserSiteLevelAsync(int userId, int siteId);
 
@@ -42,18 +43,11 @@ public interface UserService
     Task<UserOtp> GetUserOtpAsync(int userId, string system);
 }
 
-public class UserServiceImp : UserService
+public class UserServiceImp(
+    IConfiguration configuration,
+    IDynamicRepository repository,
+    OtpService otpService) : UserService
 {
-    private readonly IDynamicRepository repository;
-
-    private readonly OtpService otpService;
-
-    public UserServiceImp(IDynamicRepository repository, OtpService otpService)
-    {
-        this.repository = repository;
-        this.otpService = otpService;
-    }
-
     public async Task<User> GetByIdAsync(int id)
     {
         var criteria = new GetByIdUserCriteria
@@ -91,7 +85,7 @@ public class UserServiceImp : UserService
         return users.Select(u => u.ToNonNullUser());
     }
 
-    public async Task<IEnumerable<User>> GetBySiteAsync(int siteId = 0, bool? isActive= null)
+    public async Task<IEnumerable<User>> GetBySiteAsync(int siteId = 0, bool? isActive = null)
     {
         var criteria = new GetBySiteCriteria
         {
@@ -141,22 +135,44 @@ public class UserServiceImp : UserService
             return;
         }
 
+        if (configuration.GetValue<int>("DisableDbLog") == 1)
+        {
+            command.OnUserId = command.UserId;
+            return;
+        }
+
         await repository.ExecuteAsync(command).ConfigureAwait(false);
         await InsertLogUserLogin(command).ConfigureAwait(false);
     }
 
     public async Task ReUserCheckInAsync(UserReCheckInUserCommand command)
     {
+        if (configuration.GetValue<int>("DisableDbLog") == 1)
+        {
+            return;
+        }
+
         await repository.ExecuteAsync(command).ConfigureAwait(false);
     }
 
     public async Task UserLogOutAsync(LogOutUserCommand command)
     {
+        if (configuration.GetValue<int>("DisableDbLog") == 1)
+        {
+            return;
+        }
+
         await repository.ExecuteAsync(command).ConfigureAwait(false);
     }
 
     public async Task UserSsoCheckInAsync(UserSsoCheckInUserCommand command)
     {
+        if (configuration.GetValue<int>("DisableDbLog") == 1)
+        {
+            command.OnUserId = command.UserId;
+            return;
+        }
+
         await repository.ExecuteAsync(command).ConfigureAwait(false);
         await InsertLogUserLogin(command).ConfigureAwait(false);
     }
@@ -225,17 +241,8 @@ public class UserServiceImp : UserService
 
     private async Task ExecuteLoginLogCommand(INonQueryCommand logCommand)
     {
-        try
-        {
-            await repository.ExecuteAsync(logCommand).ConfigureAwait(false);
-        }
-
-        catch (Exception ex)
-        {
-            await Logger.Log.ErrorAsync(ex.Message, ex).ConfigureAwait(false);
-        }
+        await repository.ExecuteAsync(logCommand).ConfigureAwait(false);
     }
-
 
     public async Task<bool> IgnoredOtpAsync(int userId, string system)
     {

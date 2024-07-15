@@ -6,15 +6,8 @@ namespace NAP.AuthWebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class GroupController : ControllerBase
+public class GroupController(GroupService groupService) : ControllerBase
 {
-    private readonly GroupService groupService;
-
-    public GroupController(GroupService groupService)
-    {
-        this.groupService = groupService;
-    }
-
     [Route("{id:int}")]
     [HttpGet]
     public async Task<Group> Get(int id)

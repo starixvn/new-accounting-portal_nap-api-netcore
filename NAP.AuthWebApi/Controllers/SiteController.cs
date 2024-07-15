@@ -6,15 +6,8 @@ namespace NAP.AuthWebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class SiteController : ControllerBase
+public class SiteController(MenuItemService menuItemService) : ControllerBase
 {
-    private readonly MenuItemService menuItemService;
-
-    public SiteController(MenuItemService menuItemService)
-    {
-        this.menuItemService = menuItemService;
-    }
-
     [Route("{siteId:int}/menuItem")]
     [HttpGet]
     public async Task<IEnumerable<MenuItem>> GetMenus(int siteId, string environment, bool ? isActive)

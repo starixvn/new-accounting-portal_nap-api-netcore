@@ -7,15 +7,8 @@ namespace NAP.AuthWebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class SsoLoginController : ControllerBase
+public class SsoLoginController(UserService userService) : ControllerBase
 {
-    private readonly UserService userService;
-
-    public SsoLoginController(UserService userService)
-    {
-        this.userService = userService;
-    }
-
     [Route("")]
     [HttpGet]
     public async Task<string> GetTime()

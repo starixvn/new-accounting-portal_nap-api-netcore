@@ -9,15 +9,8 @@ public interface GroupService
     Task<Group> GetByIdAsync(int id);
 }
 
-public class GroupServiceImp : GroupService
+public class GroupServiceImp(IDynamicRepository repository) : GroupService
 {
-    private readonly IDynamicRepository repository;
-
-    public GroupServiceImp(IDynamicRepository repository)
-    {
-        this.repository = repository;
-    }
-
     public async Task<Group> GetByIdAsync(int id)
     {
         var criteria = new GetByIdGroupCriteria

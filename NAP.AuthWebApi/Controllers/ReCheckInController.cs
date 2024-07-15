@@ -7,20 +7,9 @@ namespace NAP.AuthWebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ReCheckInController : ControllerBase
+public class ReCheckInController(UserService userService,
+    SiteService siteService) : ControllerBase
 {
-    private readonly UserService userService;
-    private readonly SiteService siteService;
-
-
-    public ReCheckInController(
-        UserService userService,
-        SiteService siteService)
-    {
-        this.userService = userService;
-        this.siteService = siteService;
-    }
-
     [Route("")]
     [HttpGet]
     public async Task<int> Get(int onUserId, int siteId)

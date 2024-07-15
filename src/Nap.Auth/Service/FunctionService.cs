@@ -13,16 +13,8 @@ public interface FunctionService
     Task<int> GetByKeyAndSiteAsync(string key, int siteId);
 }
 
-public class FunctionServiceImp : FunctionService
+public class FunctionServiceImp(IDynamicRepository repository) : FunctionService
 {
-    private readonly IDynamicRepository repository;
-
-
-    public FunctionServiceImp(IDynamicRepository repository)
-    {
-        this.repository = repository;
-    }
-
     public async Task<IEnumerable<FunctionPolicy>> GetByUserAndSiteIncludeGroupAsync(
         int userId,
         int siteId,

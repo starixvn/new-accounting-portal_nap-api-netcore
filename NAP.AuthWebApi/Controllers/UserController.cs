@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Nap.Auth.Business;
 using Nap.Auth.Model;
 using Nap.Auth.Model.ValueObject;
 using Nap.Auth.Service;
@@ -7,25 +8,12 @@ namespace NAP.AuthWebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class UserController : ControllerBase
-{
-    private readonly UserService userService;
-    private readonly SiteService siteService;
-    private readonly MenuItemService menuItemService;
-    private readonly FunctionService functionService;
-
-    public UserController(
-        UserService userService,
+public class UserController(UserService userService,
         SiteService siteService,
         MenuItemService menuItemService,
         FunctionService functionService)
-    {
-        this.userService = userService;
-        this.siteService = siteService;
-        this.menuItemService = menuItemService;
-        this.functionService = functionService;
-    }
-
+    : ControllerBase
+{
     [Route("{id:int}")]
     [HttpGet]
     public async Task<User> Get(int id)
@@ -37,7 +25,9 @@ public class UserController : ControllerBase
     [Route("")]
     public async Task<User> Get(string username)
     {
-        return await userService.GetByUsernameAsync(username).ConfigureAwait(false);
+        var user = await userService.GetByUsernameAsync(username).ConfigureAwait(false);
+
+        return user;
     }
 
     [HttpGet]
@@ -56,7 +46,7 @@ public class UserController : ControllerBase
 
     [Route("{userId:int}/permissions")]
     [HttpGet]
-    public async Task<IEnumerable<FunctionPolicy>> FunctionPolicies(int userId, int siteId, string parentFunctionKey, string environment)
+    public async Task<IEnumerable<FunctionPolicy>> FunctionPolicies(int userId, int siteId, string parentFunctionKey = "", string environment= Constant.Uat)
     {
         var functionPolicies = await functionService.GetByUserAndSiteIncludeGroupAsync(userId, siteId, environment).ConfigureAwait(false);
 

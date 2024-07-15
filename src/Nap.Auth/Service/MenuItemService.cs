@@ -12,15 +12,8 @@ public interface MenuItemService
     Task<IEnumerable<MenuItem>> GetBySiteAsync(int siteId, string env = Constant.Uat, bool? isActive = null);
 }
 
-public class MenuItemServiceImp : MenuItemService
+public class MenuItemServiceImp(IDynamicRepository repository) : MenuItemService
 {
-    private readonly IDynamicRepository repository;
-
-    public MenuItemServiceImp(IDynamicRepository repository)
-    {
-        this.repository = repository;
-    }
-
     public async Task<IEnumerable<MenuItem>> GetBySiteAsync(int siteId, string env = "UAT", bool? isActive = null)
     {
         var criteria = new GetMenuItemBySiteCriteria
