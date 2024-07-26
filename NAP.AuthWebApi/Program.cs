@@ -8,17 +8,21 @@ using Newtonsoft.Json;
 
 
 var builder = WebApplication.CreateBuilder(args);
+var services = builder.Services;
+var configuration = builder.Configuration;
 
 // Add services to the container.
-builder.Services.AddCoreServices();
-builder.Services.AddFanexSql(builder.Configuration);
-builder.Services.AddFanexServices(builder.Configuration);
-builder.Services.AddInternalServices();
-builder.Services.AddControllers();
+services.AddCoreServices();
+services.AddFanexSql(configuration);
+services.AddFanexServices(configuration);
+services.AddFanexCaching(configuration);
+services.AddNapApiCachingServices();
+services.AddInternalServices();
+services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+services.AddEndpointsApiExplorer();
+services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -45,4 +49,4 @@ app.UseExceptionHandler(exceptionHandlerApp =>
 });
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();

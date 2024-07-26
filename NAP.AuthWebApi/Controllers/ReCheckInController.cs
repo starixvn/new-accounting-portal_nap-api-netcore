@@ -7,20 +7,12 @@ namespace NAP.AuthWebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ReCheckInController(UserService userService,
-    SiteService siteService) : ControllerBase
+public class ReCheckInController(UserService userService) : ControllerBase
 {
     [Route("")]
     [HttpGet]
     public async Task<int> Get(int onUserId, int siteId)
     {
-        var siteStatus = (await siteService.GetByIdAsync(siteId).ConfigureAwait(false)).IsActive;
-
-        if (!siteStatus)
-        {
-            return (int)Constant.ReCheckInResult.KickedOut;
-        }
-
         var criteria = new UserReCheckInUserCommand
         {
             OnUserId = onUserId

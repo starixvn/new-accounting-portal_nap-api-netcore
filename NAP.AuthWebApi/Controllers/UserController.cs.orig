@@ -1,0 +1,113 @@
+using Microsoft.AspNetCore.Mvc;
+using Nap.Auth.Business;
+using Nap.Auth.Model;
+using Nap.Auth.Model.ValueObject;
+using Nap.Auth.Service;
+
+namespace NAP.AuthWebApi.Controllers;
+
+using Fanex.Logging;
+
+[ApiController]
+[Route("[controller]")]
+public class UserController(UserService userService,
+        SiteService siteService,
+        MenuItemService menuItemService,
+        FunctionService functionService)
+    : ControllerBase
+{
+    [Route("{id:int}")]
+    [HttpGet]
+    public async Task<User> Get(int id)
+    {
+        return await userService.GetByIdAsync(id).ConfigureAwait(false);
+    }
+
+    [HttpGet]
+    [Route("")]
+    public async Task<User> Get(string username)
+    {
+        var user = await userService.GetByUsernameAsync(username).ConfigureAwait(false);
+
+        return user;
+    }
+
+    [HttpGet]
+    [Route("bysite")]
+    public async Task<IEnumerable<User>> GetBySite(int siteId, bool? isActive)
+    {
+        return await userService.GetBySiteAsync(siteId, isActive).ConfigureAwait(false);
+    }
+
+    [Route("{userId:int}/permission")]
+    [HttpGet]
+    public async Task<int> GetPermission(int userId, int siteId, string functionKey)
+    {
+        return await userService.GetUserSiteFunctionKeyPolicyAsync(userId, siteId, functionKey).ConfigureAwait(false);
+    }
+
+    [Route("{userId:int}/permissions")]
+    [HttpGet]
+    public async Task<IEnumerable<FunctionPolicy>> FunctionPolicies(int userId, int siteId, string parentFunctionKey = "", string environment= Constant.Uat)
+    {
+        var functionPolicies = await functionService.GetByUserAndSiteIncludeGroupAsync(userId, siteId, environment).ConfigureAwait(false);
+
+        return string.IsNullOrEmpty(parentFunctionKey)
+            ? functionPolicies :
+            functionPolicies.Where(f => f.ParentKey == parentFunctionKey);
+    }
+
+    [Route("{userId:int}/menuItem")]
+    [HttpGet]
+    public async Task<IEnumerable<MenuItem>> MenuItem(int userId, int siteId, string environment)
+    {
+        return await menuItemService.GetByUserAndSiteAsync(userId, siteId, environment).ConfigureAwait(false);
+    }
+
+    [Route("{userId:int}/sitelevel")]
+    [HttpGet]
+    public async Task<IEnumerable<SiteLevel>> SiteLevel(int userId, string environment)
+    {
+        return await siteService.GetSiteLevelByUserAsync(userId, environment).ConfigureAwait(false);
+    }
+
+    [HttpGet]
+    [Route("{userId:int}/levelonsite/{siteId:int}")]
+    public async Task<int> LevelOnSite(int userId, int siteId)
+    {
+        return await userService.GetUserSiteLevelAsync(userId, siteId);
+    }
+
+    [HttpGet]
+<<<<<<< HEAD
+    [Route("byfunctionandsite")]
+    public async Task<IEnumerable<User>> LevelOnSite(string functionKey, int siteId)
+    {
+        await LogService.ErrorAsync($"byfunctionandsite:{functionKey}-{siteId}");
+        var functionId = await functionService.GetByKeyAndSiteAsync(functionKey, siteId);
+        return await userService.GetByFunctionAndSiteAsync(functionId, siteId);
+    }
+
+    [HttpGet]
+=======
+>>>>>>> 65fee7e (feat: apply  caching)
+    [Route("{userId:int}/verify-otp")]
+    public async Task<bool> VerifyOtp(int userId, string system, string otp)
+    {
+        return await userService.VerifyOtpAsync(userId, system, otp);
+    }
+
+    [HttpGet]
+    [Route("{userId:int}/ignored-otp")]
+    public async Task<bool> IgnoredOtp(int userId, string system)
+    {
+        return await userService.IgnoredOtpAsync(userId, system);
+    }
+
+    [HttpGet]
+    [Route("{userId:int}/otp")]
+    public async Task<UserOtp> GetUserOtp(int userId, string system)
+    {
+        return await userService.GetUserOtpAsync(userId, system);
+    }
+}
