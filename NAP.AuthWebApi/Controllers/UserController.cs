@@ -76,16 +76,8 @@ public class UserController(UserService userService,
         return await userService.GetUserSiteLevelAsync(userId, siteId);
     }
 
-    [HttpGet]
-    [Route("byfunctionandsite")]
-    public async Task<IEnumerable<User>> LevelOnSite(string functionKey, int siteId)
-    {
-        var functionId = await functionService.GetByKeyAndSiteAsync(functionKey, siteId);
-        return await userService.GetByFunctionAndSiteAsync(functionId, siteId);
-    }
-
-    [HttpGet]
     [Route("{userId:int}/verify-otp")]
+    [HttpGet]
     public async Task<bool> VerifyOtp(int userId, string system, string otp)
     {
         return await userService.VerifyOtpAsync(userId, system, otp);
@@ -96,12 +88,5 @@ public class UserController(UserService userService,
     public async Task<bool> IgnoredOtp(int userId, string system)
     {
         return await userService.IgnoredOtpAsync(userId, system);
-    }
-
-    [HttpGet]
-    [Route("{userId:int}/otp")]
-    public async Task<UserOtp> GetUserOtp(int userId, string system)
-    {
-        return await userService.GetUserOtpAsync(userId, system);
     }
 }

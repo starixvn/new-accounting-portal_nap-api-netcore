@@ -1,4 +1,4 @@
-using Fanex.Data.Repository;
+﻿using Fanex.Data.Repository;
 namespace Nap.Auth.Criteria.User;
 
 public class GetBySiteCriteria : CriteriaBase
@@ -7,13 +7,7 @@ public class GetBySiteCriteria : CriteriaBase
 
     public bool? IsActive { get; set; }
 
-    public override string GetSettingKey()
-    {
-        return "NAP_User_GetBySite";
-    }
+    public override string GetSettingKey()=> "NAP_User_GetBySite";
 
-    public override bool IsValid()
-    {
-        return true;
-    }
+    public override bool IsValid()=>true;
 }

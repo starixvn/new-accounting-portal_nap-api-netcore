@@ -1,22 +1,28 @@
 namespace Nap.Auth.Model;
 
+using Business;
+
 public class Function
 {
-    public int Id { get; set; }
+    public int Id { get; set; } = 0;
 
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
-    public string Key { get; set; }
+    public string Key { get; set; } = string.Empty;
 
-    public int ParentId { get; set; }
+    public int ParentId { get; set; } = 0;
 
-    public string ParentName { get; set; }
+    public string ParentName { get; set; } = string.Empty;
 
-    public short DisplayOrder { get; set; }
+    public int SiteId { get; set; } = 0;
 
-    public bool IsActive { get; set; }
+    public string SiteName { get; set; } = string.Empty;
 
-    public string Environment { get; set; }
+    public short DisplayOrder { get; set; } = 0;
+
+    public bool IsActive { get; set; } = false;
+
+    public string Environment { get; set; } = Constant.Uat;
 
     public Function ToNonNullFunction()
     {

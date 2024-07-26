@@ -8,7 +8,6 @@ public class JobCommand(string command, int siteId)
     public const string Menu = "MenuCommand";
     public const string UserFunctionPolicy = "UserFunctionPolicyCommand";
     public const string UserSiteLevel = "UserSiteLevelCommand";
-    public const string UserOtp = "UserOtpCommand";
     public const string User = "UserCommand";
 
     public string Command { get; set; } = command;

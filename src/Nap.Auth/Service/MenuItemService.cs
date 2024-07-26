@@ -1,9 +1,9 @@
 using Nap.Auth.Business;
-using Nap.Auth.Criteria.MenuItem;
-using Fanex.Data.Repository;
 using Nap.Auth.Model;
 
 namespace Nap.Auth.Service;
+
+using DataCachingPull;
 
 public interface MenuItemService
 {
@@ -12,33 +12,19 @@ public interface MenuItemService
     Task<IEnumerable<MenuItem>> GetBySiteAsync(int siteId, string env = Constant.Uat, bool? isActive = null);
 }
 
-public class MenuItemServiceImp(IDynamicRepository repository) : MenuItemService
+public class MenuItemServiceImp(MemoryCachingStorage cachingService) : MenuItemService
 {
     public async Task<IEnumerable<MenuItem>> GetBySiteAsync(int siteId, string env = "UAT", bool? isActive = null)
     {
-        var criteria = new GetMenuItemBySiteCriteria
-        {
-            SiteId = siteId,
-            Environment = env,
-            IsActive = isActive
-        };
+        var menuItems = cachingService.GetSiteMenuItems(siteId, env, isActive).OrderBy(m => m.Name);
 
-        var menuItems = await repository.FetchAsync<MenuItem>(criteria).ConfigureAwait(false);
-
-        return menuItems.Select(m => m.ToNonNullMenuItem()).OrderBy(m => m.Name);
+        return await Task.FromResult(menuItems);
     }
 
     public async Task<IEnumerable<MenuItem>> GetByUserAndSiteAsync(int userId, int siteId, string env = Constant.Uat)
     {
-        var criteria = new GetByUserAndSiteIncludeGroupMenuItemCriteria
-        {
-            UserId = userId,
-            SiteId = siteId,
-            Environment = env
-        };
+        var menuItems = cachingService.GetUserMenuItems(userId, siteId, env).OrderBy(m => m.Name);
 
-        var menuItems = await repository.FetchAsync<MenuItem>(criteria).ConfigureAwait(false);
-
-        return menuItems.Select(m => m.ToNonNullMenuItem()).OrderBy(m => m.Name);
+        return await Task.FromResult(menuItems);
     }
 }

@@ -31,3 +31,5 @@ Logs/
 .vs/config/applicationhost.config
 packages/
 .vs
+*.orig
+*.orig

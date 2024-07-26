@@ -16,8 +16,6 @@ public interface DataBatchLoadingService
 
     Task<List<BatchMenuItem>> GetAllMenuItems();
 
-    Task<List<BatchUserOtp>> GetAllUserOtp();
-
     Task<List<BatchUser>> GetAllUsers();
 }
 
@@ -66,13 +64,6 @@ public class DataBatchLoadingServiceImp(IDynamicRepository repository) : DataBat
         var criteria = new GetAllMenuItemsCriteria();
         var menuItems = await repository.FetchAsync<BatchMenuItem>(criteria);
         return menuItems.Where(m => m.IsActive).ToList();
-    }
-
-    public async Task<List<BatchUserOtp>> GetAllUserOtp()
-    {
-        var criteria = new UserGetOtpCriteria { CustId = 0, System = "" };
-        var users = await repository.FetchAsync<BatchUserOtp>(criteria);
-        return users.ToList();
     }
 
     public async Task<List<BatchUser>> GetAllUsers()

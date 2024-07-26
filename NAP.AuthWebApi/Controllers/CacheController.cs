@@ -5,7 +5,7 @@ using Nap.Auth.DataCachingPush;
 
 [ApiController]
 [Route("cache")]
-public class CacheController(DataCachingService dataCachingService) : ControllerBase
+public class CacheController(CachingReloaderService dataCachingService) : ControllerBase
 {
     [HttpGet]
     [Route("")]
@@ -49,14 +49,21 @@ public class CacheController(DataCachingService dataCachingService) : Controller
             case JobCommand.User:
                 await dataCachingService.ReloadUsers();
                 break;
-            case JobCommand.UserOtp:
-                await dataCachingService.ReloadUserOtp();
-                break;
             case JobCommand.UserSiteLevel:
                 await dataCachingService.ReloadUserSiteLevels();
+                break;
+            default:
                 break;
         }
 
         return dataCachingService.CacheVersion;
+    }
+
+    [HttpGet]
+    [Route("clear")]
+    public IActionResult Clear()
+    {
+        GC.Collect(2, GCCollectionMode.Aggressive, true, true);
+        return Content("Done");
     }
 }

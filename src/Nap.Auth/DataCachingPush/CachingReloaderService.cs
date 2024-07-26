@@ -2,7 +2,7 @@
 
 using Fanex.Caching;
 
-public interface DataCachingService
+public interface CachingReloaderService
 {
     Task ReloadSites();
 
@@ -18,15 +18,13 @@ public interface DataCachingService
 
     Task ReloadSiteMenu();
 
-    Task ReloadUserOtp();
-
     Task ReloadUsers();
 
     string CacheVersion { get; }
 }
 
 
-public class DataCachingServiceImp(DataBatchLoadingService repository, ICache cache) : DataCachingService
+public class CachingReloaderServiceImp(DataBatchLoadingService repository, ICache cache) : CachingReloaderService
 {
     private const string CacheVersionKey = "NAP_API_CACHE_VERSION";
 
@@ -63,7 +61,6 @@ public class DataCachingServiceImp(DataBatchLoadingService repository, ICache ca
         await ReloadSiteMenu();
         await ReloadUserSiteLevels();
         await ReloadUserFunctionPolicy();
-        await ReloadUserOtp();
         await ReloadUsers();
     }
 
@@ -118,13 +115,6 @@ public class DataCachingServiceImp(DataBatchLoadingService repository, ICache ca
             .Select(m => m.ToNonNullMenuItem())
             .ToList();
         await cache.SetAsync(NapApiCacheKey.SiteMenuItems, menuItems, cacheOptions);
-        await SaveCacheVersion();
-    }
-
-    public async Task ReloadUserOtp()
-    {
-        var otpList = await repository.GetAllUserOtp();
-        await cache.SetAsync(NapApiCacheKey.UserOTP, otpList, cacheOptions);
         await SaveCacheVersion();
     }
 
