@@ -70,7 +70,33 @@
     </Setting>
   </Function>
   <Function Name="LogUserLogin">
-    <Setting Key="NAP_LogUserLogin_Insert" SpName="NAP_LogUserLogin_Insert" DbName="DBNAP.bodb_NAPLOG.wsv_nap" />
+    <Setting Key="NAP_LogUserLogin_Insert" SpName="NAP_LogUserLogin_Insert" DbName="DBNAP.bodb_NAPLOG.wsv_nap" />    
+  </Function>
+  <Function Name="NapApiCaching">
+
+    <Setting Key="NAP_Caching_GetUserFunctionsBySite" SpName="NAP_Caching_GetUserFunctionsBySite" DbName="DBPOL.NAP_UserControl.wsv_nap" />
+    <Setting Key="NAP_Caching_GetUserSiteLevel" SpName="NAP_Caching_GetUserSiteLevel" DbName="DBPOL.NAP_UserControl.wsv_nap" />
+    <Setting Key="NAP_MenuItem_GetAll" SpName="NAP_MenuItem_GetAll" DbName="DBPOL.NAP_UserControl.wsv_nap" >
+      <Mapping DataField="MenuItemId" ObjectProperty="Id" />
+      <Mapping DataField="MenuItemName" ObjectProperty="Name" />
+    </Setting>
+    <Setting Key="NAP_Function_GetAll" SpName="NAP_Function_GetAll" DbName="DBPOL.NAP_UserControl.wsv_nap">
+      <Mapping DataField="FunctionId" ObjectProperty="Id" />
+      <Mapping DataField="FunctionName" ObjectProperty="Name" />
+      <Mapping DataField="FunctionKey" ObjectProperty="Key" />
+    </Setting>
+    <Setting Key="NAP_Group_GetAll" SpName="NAP_Group_GetAll" DbName="DBPOL.NAP_UserControl.wsv_nap">
+      <Mapping DataField="GroupId" ObjectProperty="Id" />
+      <Mapping DataField="GroupName" ObjectProperty="Name" />
+    </Setting>
+    <Setting Key="NAP_User_GetAll" SpName="NAP_User_GetAll" DbName="DBPOL.NAP_UserControl.wsv_nap">
+      <Mapping DataField="UserId" ObjectProperty="Id" />
+      <Mapping DataField="userpwd" ObjectProperty="Password" />
+    </Setting>
     <Setting Key="NAP_Admin_GetOTP" SpName="NAP_Admin_GetOTP" DbName="DBPOL.NAP_UserControl.wsv_nap" />
+    <Setting Key="NAP_Site_GetAll" SpName="NAP_Site_GetAll" DbName="DBPOL.NAP_UserControl.wsv_nap">
+      <Mapping DataField="SiteId" ObjectProperty="Id" />
+      <Mapping DataField="SiteName" ObjectProperty="Name" />
+    </Setting>
   </Function>
 </Functions>
