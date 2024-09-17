@@ -24,6 +24,19 @@ public interface MemoryCachingStorage
     User GetUser(int id);
     User GetUser(string username);
     List<User> GetUsers(int siteId, bool? isActive = null);
+
+    #region Debug
+    Dictionary<int, Dictionary<int, List<BatchUserFunctionPolicy>>> SiteUserFunctionPoliciesCache { get; }
+    Dictionary<int, Dictionary<int, List<MenuItem>>> SiteUserMenuItemsCache { get; }
+    Dictionary<int, Function> FunctionsCache { get; }
+    Dictionary<int, Group> GroupsCache { get; }
+    Dictionary<int, List<BatchUserSiteLevel>> UserSiteLevelsByUserCache { get; }
+    Dictionary<int, List<BatchUserSiteLevel>> UserSiteLevelsBySiteCache { get; }
+    Dictionary<int, List<MenuItem>> SiteMenuItemsCache { get; }
+    List<UserOtp> UserOtpCache { get; }
+    List<User> UsersCache { get; }
+
+    #endregion
 }
 
 public class MemoryCachingStorageImp : MemoryCachingStorage
@@ -250,4 +263,27 @@ public class MemoryCachingStorageImp : MemoryCachingStorage
             .OrderBy(u => u.Id)
             .ToList();
     }
+
+    #region Debug
+
+    public Dictionary<int, Dictionary<int, List<BatchUserFunctionPolicy>>> SiteUserFunctionPoliciesCache =>
+        siteUserFunctionPoliciesCache;
+
+    public Dictionary<int, Dictionary<int, List<MenuItem>>> SiteUserMenuItemsCache => siteUserMenuItemsCache;
+
+    public Dictionary<int, Function> FunctionsCache => functionsCache;
+
+    public Dictionary<int, Group> GroupsCache => groupsCache;
+
+    public Dictionary<int, List<BatchUserSiteLevel>> UserSiteLevelsByUserCache => userSiteLevelsByUserCache;
+
+    public Dictionary<int, List<BatchUserSiteLevel>> UserSiteLevelsBySiteCache => userSiteLevelsBySiteCache;
+
+    public Dictionary<int, List<MenuItem>> SiteMenuItemsCache => siteMenuItemsCache;
+
+    public List<UserOtp> UserOtpCache => userOtpCache;
+
+    public List<User> UsersCache => usersCache;
+
+    #endregion
 }
