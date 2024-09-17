@@ -8,7 +8,9 @@ using ONEbook.OTP.Services;
 
 namespace NAP.AuthWebApi;
 
+using Fanex.Caching.Redis;
 using Fanex.Logging.Sentry.RavenClient;
+using Nap.Auth.DataCachingPush;
 using SharpRaven;
 
 public static class ServiceCollectionExtensions
@@ -50,6 +52,19 @@ public static class ServiceCollectionExtensions
         ExceptionHandler
             .UseConfig(new LoggingConfiguration())
             .UseGetDbExceptionInfo(DatabaseInfoGetters.GetDbExceptionInfo);
+
+        return services;
+    }
+
+    public static void AddFanexCaching(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddRedisCache(configuration.GetSection("Fanex.Caching.Redis"));
+    }
+
+    public static IServiceCollection AddNapApiCachingServices(this IServiceCollection services)
+    {
+        services.AddSingleton<DataBatchLoadingService, DataBatchLoadingServiceImp>();
+        services.AddSingleton<DataCachingService, DataCachingServiceImp>();
 
         return services;
     }
