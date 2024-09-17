@@ -161,7 +161,7 @@ public class MemoryCachingStorageImp : MemoryCachingStorage
             return [];
         }
 
-        return policiesByUser.Where(p => env == Constant.Uat || p.Environment == env)
+        return policiesByUser.Where(s => EnvironmentMatched(s.Environment, env))
             .Select(p => p.ToFunctionPolicy())
             .Select(p => p.ToNonNullFunctionPolicy())
             .ToList();
@@ -179,7 +179,7 @@ public class MemoryCachingStorageImp : MemoryCachingStorage
             return [];
         }
 
-        return policiesByUser.Where(p => env == Constant.Uat || p.Environment == env)
+        return policiesByUser.Where(s => EnvironmentMatched(s.Environment, env))
             .Where(m => m.IsActive)
             .ToList();
     }
@@ -206,7 +206,7 @@ public class MemoryCachingStorageImp : MemoryCachingStorage
         }
 
         return siteLevels
-            .Where(s => env == Constant.Uat || s.Environment == env)
+            .Where(s => EnvironmentMatched(s.Environment, env))
             .Select(s => new SiteLevel
             {
                 SiteId = s.SiteId,
@@ -222,7 +222,7 @@ public class MemoryCachingStorageImp : MemoryCachingStorage
             return [];
         }
 
-        return menuItems.Where(s => env == Constant.Uat || s.Environment == env)
+        return menuItems.Where(s => EnvironmentMatched(s.Environment, env))
             .Where(s => isActive == null || s.IsActive == isActive.Value)
             .ToList();
     }
@@ -262,6 +262,12 @@ public class MemoryCachingStorageImp : MemoryCachingStorage
             .Select(u => u.ToNonNullUser())
             .OrderBy(u => u.Id)
             .ToList();
+    }
+
+    private static bool EnvironmentMatched(string checkingEnv, string env)
+    {
+        return string.Equals(env, Constant.Uat, StringComparison.OrdinalIgnoreCase)
+               || string.Equals(checkingEnv, env, StringComparison.OrdinalIgnoreCase);
     }
 
     #region Debug
