@@ -85,12 +85,13 @@ public class UserServiceImp(
         return user.ToNonNullUser();
     }
 
-    #endregion
-
-    #region User NoCache
-
     public async Task<IEnumerable<User>> GetBySiteAsync(int siteId = 0, bool? isActive = default)
     {
+        if (await maintenanceService.IsUnderMaintenanceAsync())
+        {
+            return cachingService.GetUsers(siteId, isActive);
+        }
+
         var criteria = new GetBySiteCriteria
         {
             SiteId = siteId,
