@@ -1,41 +1,23 @@
-using Fanex.Data.Repository;
 using Nap.Auth.Business;
-using Nap.Auth.Criteria.Site;
-using Nap.Auth.Model;
 using Nap.Auth.Model.ValueObject;
 
 namespace Nap.Auth.Service;
 
+using DataCachingPull;
+
 public interface SiteService
 {
-    Task<Site> GetByIdAsync(int id);
-
     Task<IEnumerable<SiteLevel>> GetSiteLevelByUserAsync(int userId, string env = Constant.Uat);
 }
 
-public class SiteServiceImp(IDynamicRepository repository) : SiteService
+public class SiteServiceImp(MemoryCachingStorage cachingService) : SiteService
 {
-    public async Task<Site> GetByIdAsync(int id)
-    {
-        var criteria = new GetByIdSiteCriteria
-        {
-            SiteId = id
-        };
-
-        var site = await repository.GetAsync<Site>(criteria).ConfigureAwait(false);
-
-        return site?.ToNonNullSite();
-    }
-
     public async Task<IEnumerable<SiteLevel>> GetSiteLevelByUserAsync(int userId, string env = Constant.Uat)
     {
-        var criteria = new GetByUserSiteCriteria
-        {
-            UserId = userId,
-            Environment = env,
-            IsActive = true
-        };
-
-        return await repository.FetchAsync<SiteLevel>(criteria).ConfigureAwait(false);
+        var siteLevels = cachingService.GetUserLevels(userId, env)
+            .OrderBy(s=>s.Level)
+            .ThenBy(s=>s.IsActive)
+            .ToList();
+        return await Task.FromResult(siteLevels);
     }
 }

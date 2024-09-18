@@ -49,17 +49,6 @@ public class GetAllUsersCriteria : ICriteria
     public bool IsValid() => true;
 }
 
-public class UserGetOtpCriteria : CriteriaBase
-{
-    public int CustId { get; set; }
-
-    public string System { get; set; }
-
-    public override string GetSettingKey() => "NAP_Admin_GetOTP";
-
-    public override bool IsValid() => true;
-}
-
 public class GetAllSiteCriteria : CriteriaBase
 {
     public string Environment { get; set; } = Constant.Uat;

@@ -1,10 +1,9 @@
-using Fanex.Data.Repository;
 using Nap.Auth.Business;
-using Nap.Auth.Criteria.Function;
-using Nap.Auth.Model;
 using Nap.Auth.Model.ValueObject;
 
 namespace Nap.Auth.Service;
+
+using DataCachingPull;
 
 public interface FunctionService
 {
@@ -13,61 +12,21 @@ public interface FunctionService
     Task<int> GetByKeyAndSiteAsync(string key, int siteId);
 }
 
-public class FunctionServiceImp(IDynamicRepository repository) : FunctionService
+public class FunctionServiceImp(MemoryCachingStorage cachingService) : FunctionService
 {
     public async Task<IEnumerable<FunctionPolicy>> GetByUserAndSiteIncludeGroupAsync(
         int userId,
         int siteId,
         string env = Constant.Uat)
     {
-        var criteria = new GetByUserAndSiteIncludeGroupFunctionCriteria
-        {
-            UserId = userId,
-            SiteId = siteId,
-            Environment = env
-        };
-
-        var functionPoliciesEnumerable = await repository.FetchAsync<FunctionPolicy>(criteria).ConfigureAwait(false);
-
-        var functionPolicies = functionPoliciesEnumerable.Select(f => f.ToNonNullFunctionPolicy()).ToList();
-
-        await AssignParentFunctionKey(functionPolicies).ConfigureAwait(false);
-
-        return functionPolicies;
-    }
-
-    private async Task AssignParentFunctionKey(IEnumerable<FunctionPolicy> functionPolicies)
-    {
-        var childFunctionPolicies = functionPolicies.Where(f => f.ParentId > 0);
-        foreach (var functionPolicy in childFunctionPolicies)
-        {
-            var parentId = functionPolicy.ParentId;
-            var parentFunction = await GetById(parentId).ConfigureAwait(false);
-            functionPolicy.ParentKey = StringUtility.ToNonNull(parentFunction?.Key);
-        }
-    }
-
-    private async Task<Function> GetById(int id)
-    {
-        var criteria = new GetByIdFunctionCriteria
-        {
-            FunctionId = id
-        };
-
-        var function = await repository.GetAsync<Function>(criteria).ConfigureAwait(false) ?? new Function();
-
-        return function.ToNonNullFunction();
+        var policies = cachingService.GetUserFunctions(userId, siteId, env).OrderBy(f => f.Id);
+        return await Task.FromResult(policies);
     }
 
     public async Task<int> GetByKeyAndSiteAsync(string key, int siteId)
     {
-        var criteria = new GetByKeyAndSiteFunctionCriteria
-        {
-            FunctionKey = key,
-            SiteId = siteId
-        };
+        var functionId = cachingService.GetFunctionIdByKey(key, siteId);
 
-        var function = await repository.GetAsync<Function>(criteria);
-        return function?.Id ?? 0;
+        return await Task.FromResult(functionId);
     }
 }

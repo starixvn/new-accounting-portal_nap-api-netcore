@@ -10,12 +10,12 @@ namespace NAP.AuthWebApi;
 
 using Fanex.Caching.Redis;
 using Fanex.Logging.Sentry.RavenClient;
+using Nap.Auth.DataCachingPull;
 using Nap.Auth.DataCachingPush;
 using SharpRaven;
 
 public static class ServiceCollectionExtensions
 {
-
     public static IServiceCollection AddCoreServices(this IServiceCollection services)
     {
         services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
@@ -36,7 +36,7 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
-
+    
     public static IServiceCollection AddFanexServices(this IServiceCollection services, IConfiguration configuration)
     {
         LogManager
@@ -64,7 +64,10 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddNapApiCachingServices(this IServiceCollection services)
     {
         services.AddSingleton<DataBatchLoadingService, DataBatchLoadingServiceImp>();
-        services.AddSingleton<DataCachingService, DataCachingServiceImp>();
+        services.AddSingleton<CachingReloaderService, CachingReloaderServiceImp>();
+        services.AddSingleton<MemoryCachingStorage, MemoryCachingStorageImp>();
+        services.AddSingleton<DataCachingRealTimeJob>();
+        services.AddHostedService<DataCachingRealTimeJob>();
 
         return services;
     }

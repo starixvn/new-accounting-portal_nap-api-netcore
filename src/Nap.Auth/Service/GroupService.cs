@@ -1,25 +1,20 @@
-using Fanex.Data.Repository;
-using Nap.Auth.Criteria.Group;
 using Nap.Auth.Model;
 
 namespace Nap.Auth.Service;
+
+using DataCachingPull;
 
 public interface GroupService
 {
     Task<Group> GetByIdAsync(int id);
 }
 
-public class GroupServiceImp(IDynamicRepository repository) : GroupService
+public class GroupServiceImp(MemoryCachingStorage cachingService) : GroupService
 {
     public async Task<Group> GetByIdAsync(int id)
     {
-        var criteria = new GetByIdGroupCriteria
-        {
-            GroupId = id
-        };
+        var group = cachingService.GetGroup(id);
 
-        var group = await repository.GetAsync<Group>(criteria).ConfigureAwait(false);
-
-        return group?.ToNonNullGroup();
+        return await Task.FromResult(group);
     }
 }

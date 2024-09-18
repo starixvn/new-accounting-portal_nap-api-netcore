@@ -1,5 +1,4 @@
 using Fanex.Data.Repository;
-using Fanex.Logging;
 using Nap.Auth.Criteria.Trace;
 using Nap.Auth.Criteria.User;
 using Nap.Auth.Model;
@@ -8,7 +7,10 @@ using ONEbook.OTP.Services;
 namespace Nap.Auth.Service;
 
 using System.Globalization;
+using DataCachingPull;
 using Microsoft.Extensions.Configuration;
+using Nap.Auth.DataCachingPush;
+using ONEbook.UM.Services;
 
 public interface UserService
 {
@@ -28,8 +30,6 @@ public interface UserService
 
     Task<User> GetByUsernameAsync(string username);
 
-    Task<IEnumerable<User>> GetByFunctionAndSiteAsync(int functionId, int siteId = 0);
-
     Task<IEnumerable<User>> GetBySiteAsync(int siteId = 0, bool? isActive = true);
 
     Task<int> GetUserSiteLevelAsync(int userId, int siteId);
@@ -39,17 +39,25 @@ public interface UserService
     Task<bool> IgnoredOtpAsync(int userId, string system);
 
     Task<bool> VerifyOtpAsync(int userId, string system, string otp);
-
-    Task<UserOtp> GetUserOtpAsync(int userId, string system);
 }
 
 public class UserServiceImp(
     IConfiguration configuration,
+    IMaintenanceService maintenanceService,
     IDynamicRepository repository,
+    MemoryCachingStorage cachingService,
+    CachingReloaderService dataCachingService,
     OtpService otpService) : UserService
 {
+    #region Caching User
+
     public async Task<User> GetByIdAsync(int id)
     {
+        if (await maintenanceService.IsUnderMaintenanceAsync())
+        {
+            return cachingService.GetUser(id);
+        }
+
         var criteria = new GetByIdUserCriteria
         {
             UserId = id
@@ -62,6 +70,11 @@ public class UserServiceImp(
 
     public async Task<User> GetByUsernameAsync(string username)
     {
+        if (await maintenanceService.IsUnderMaintenanceAsync())
+        {
+            return cachingService.GetUser(username);
+        }
+
         var criteria = new GetByUsernameUserCriteria
         {
             Username = username
@@ -72,20 +85,11 @@ public class UserServiceImp(
         return user.ToNonNullUser();
     }
 
-    public async Task<IEnumerable<User>> GetByFunctionAndSiteAsync(int functionId, int siteId = 0)
-    {
-        var criteria = new GetByFunctionAndSiteUserCriteria
-        {
-            FunctionId = functionId,
-            SiteId = siteId
-        };
+    #endregion
 
-        var users = await repository.FetchAsync<User>(criteria).ConfigureAwait(false);
+    #region User NoCache
 
-        return users.Select(u => u.ToNonNullUser());
-    }
-
-    public async Task<IEnumerable<User>> GetBySiteAsync(int siteId = 0, bool? isActive = null)
+    public async Task<IEnumerable<User>> GetBySiteAsync(int siteId = 0, bool? isActive = default)
     {
         var criteria = new GetBySiteCriteria
         {
@@ -98,17 +102,99 @@ public class UserServiceImp(
         return users.Select(u => u.ToNonNullUser());
     }
 
+    #endregion
+
+    #region SiteLevel
 
     public async Task<int> GetUserSiteLevelAsync(int userId, int siteId)
     {
-        var criteria = new GetUserSiteLevelUserCriteria
+        var siteLevels = cachingService.GetUserLevels(userId)
+            .Where(s => s.IsActive && s.SiteId == siteId)
+            .Select(s => s.Level)
+            .ToArray();
+        var level = siteLevels.Length > 0 ? siteLevels.Max() : 0;
+        return await Task.FromResult(level);
+    }
+
+    public async Task<int> GetUserSiteFunctionKeyPolicyAsync(int userId, int siteId, string functionKey)
+    {
+        var policies = cachingService.GetUserFunctions(userId, siteId)
+            .Where(f => f.Key == functionKey)
+            .Select(f => f.Policy)
+            .ToArray();
+
+        var policy = policies.Length > 0 ? policies.Max() : 0;
+        return await Task.FromResult(policy);
+    }
+
+    #endregion
+
+    #region OTP
+
+    public async Task<bool> IgnoredOtpAsync(int userId, string system)
+    {
+        if (await maintenanceService.IsUnderMaintenanceAsync())
         {
-            UserId = userId,
-            SiteId = siteId
+            return true;
+        }
+
+        var userOtp = await GetUserOtpAsync(userId, system);
+
+        return userOtp == null || userOtp.IgnoreOtp;
+    }
+
+    public async Task<bool> VerifyOtpAsync(int userId, string system, string otp)
+    {
+        if (await maintenanceService.IsUnderMaintenanceAsync())
+        {
+            return true;
+        }
+
+        var userOtp = await GetUserOtpAsync(userId, system);
+
+        if (userOtp == null || userOtp.IgnoreOtp)
+        {
+            return true;
+        }
+
+        if (string.IsNullOrEmpty(userOtp.SecretKey) || string.IsNullOrEmpty(otp))
+        {
+            return false;
+        }
+
+        return otpService.VerifyOtp(userOtp.SecretKey, otp);
+    }
+
+    private async Task<UserOtp> GetUserOtpAsync(int userId, string system)
+    {
+        var criteria = new UserGetOtpCriteria
+        {
+            CustId = userId,
+            System = system
         };
 
-        return await repository.GetAsync<int>(criteria);
+        return await repository.GetAsync<UserOtp>(criteria);
     }
+
+    #endregion
+
+    #region SSO Time
+
+    public async Task<string> UserSsoGetTimeAsync()
+    {
+        var command = new UserSsoGetTimeUserCommand
+        {
+            Time = DateTime.Now
+        };
+
+        await repository.ExecuteAsync(command).ConfigureAwait(false);
+
+        return command.Time.ToString(CultureInfo.InvariantCulture);
+    }
+
+    #endregion
+
+    #region Update
 
     public async Task<bool> ChangePasswordAsync(int siteId, int userId, string password, string loginIp)
     {
@@ -124,9 +210,56 @@ public class UserServiceImp(
         };
 
         await repository.ExecuteAsync(command).ConfigureAwait(false);
-
+        await dataCachingService.ReloadUsers();
         return command.ErrCode == 0;
     }
+
+    private async Task InsertLogUserLogin(UserCheckInUserCommand command)
+    {
+        var logCommand = new InsertLogUserLoginCommand
+        {
+            UserId = command.UserId,
+            SiteId = command.SiteId,
+            LogDate = command.LoginDate,
+            DomainName = command.Domain,
+            BrowserName = command.BrowserName,
+            Platform = command.Platform,
+            Doing = command.Doing,
+            IP = command.Ip,
+            CountryCode = command.CountryCode,
+            Duration = command.Duration
+        };
+
+        await ExecuteLoginLogCommand(logCommand).ConfigureAwait(false);
+    }
+
+    private async Task InsertLogUserLogin(UserSsoCheckInUserCommand command)
+    {
+        var logCommand = new InsertLogUserLoginCommand
+        {
+            UserId = command.UserId,
+            SiteId = command.SiteId,
+            LogDate = command.LoginDate,
+            DomainName = command.Domain,
+            BrowserName = command.BrowserName,
+            Platform = command.Platform,
+            Doing = command.Doing,
+            IP = command.IP,
+            CountryCode = command.CountryCode,
+            Duration = command.Duration
+        };
+
+        await ExecuteLoginLogCommand(logCommand).ConfigureAwait(false);
+    }
+
+    private async Task ExecuteLoginLogCommand(INonQueryCommand logCommand)
+    {
+        await repository.ExecuteAsync(logCommand).ConfigureAwait(false);
+    }
+
+    #endregion
+
+    #region Checkin
 
     public async Task UserCheckInAsync(UserCheckInUserCommand command)
     {
@@ -177,105 +310,5 @@ public class UserServiceImp(
         await InsertLogUserLogin(command).ConfigureAwait(false);
     }
 
-    public async Task<int> GetUserSiteFunctionKeyPolicyAsync(int userId, int siteId, string functionKey)
-    {
-        var criteria = new GetUserSiteFunctionKeyPolicyUserCriteria
-        {
-            UserId = userId,
-            SiteId = siteId,
-            FunctionKey = functionKey
-        };
-
-        return await repository.GetAsync<int>(criteria).ConfigureAwait(false);
-    }
-
-    public async Task<string> UserSsoGetTimeAsync()
-    {
-        var command = new UserSsoGetTimeUserCommand
-        {
-            Time = DateTime.Now
-        };
-
-        await repository.ExecuteAsync(command).ConfigureAwait(false);
-
-        return command.Time.ToString(CultureInfo.InvariantCulture);
-    }
-
-    private async Task InsertLogUserLogin(UserCheckInUserCommand command)
-    {
-        var logCommand = new InsertLogUserLoginCommand
-        {
-            UserId = command.UserId,
-            SiteId = command.SiteId,
-            LogDate = command.LoginDate,
-            DomainName = command.Domain,
-            BrowserName = command.BrowserName,
-            Platform = command.Platform,
-            Doing = command.Doing,
-            IP = command.Ip,
-            CountryCode = command.CountryCode,
-            Duration = command.Duration
-        };
-
-        await ExecuteLoginLogCommand(logCommand).ConfigureAwait(false);
-    }
-
-    private async Task InsertLogUserLogin(UserSsoCheckInUserCommand command)
-    {
-        var logCommand = new InsertLogUserLoginCommand
-        {
-            UserId = command.UserId,
-            SiteId = command.SiteId,
-            LogDate = command.LoginDate,
-            DomainName = command.Domain,
-            BrowserName = command.BrowserName,
-            Platform = command.Platform,
-            Doing = command.Doing,
-            IP = command.IP,
-            CountryCode = command.CountryCode,
-            Duration = command.Duration
-        };
-
-        await ExecuteLoginLogCommand(logCommand).ConfigureAwait(false);
-    }
-
-    private async Task ExecuteLoginLogCommand(INonQueryCommand logCommand)
-    {
-        await repository.ExecuteAsync(logCommand).ConfigureAwait(false);
-    }
-
-    public async Task<bool> IgnoredOtpAsync(int userId, string system)
-    {
-        var userOtp = await GetUserOtpAsync(userId, system);
-
-        return userOtp == null || userOtp.IgnoreOtp;
-    }
-
-    public async Task<bool> VerifyOtpAsync(int userId, string system, string otp)
-    {
-        var userOtp = await GetUserOtpAsync(userId, system);
-
-        if (userOtp == null || userOtp.IgnoreOtp)
-        {
-            return true;
-        }
-
-        if (string.IsNullOrEmpty(userOtp.SecretKey) || string.IsNullOrEmpty(otp))
-        {
-            return false;
-        }
-
-        return otpService.VerifyOtp(userOtp.SecretKey, otp);
-    }
-
-    public async Task<UserOtp> GetUserOtpAsync(int userId, string system)
-    {
-        var criteria = new UserGetOtpCriteria
-        {
-            CustId = userId,
-            System = system
-        };
-
-        return await repository.GetAsync<UserOtp>(criteria);
-    }
+    #endregion
 }

@@ -1,4 +1,5 @@
-using Fanex.Data.Repository;
+﻿using Fanex.Data.Repository;
+
 namespace Nap.Auth.Criteria.User;
 
 public class UserGetOtpCriteria : CriteriaBase
