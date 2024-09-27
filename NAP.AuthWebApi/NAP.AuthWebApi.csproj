@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fanex.Caching.Redis" Version="2.2.4" />
-    <PackageReference Include="Fanex.Caching.Redis.AspNetCore" Version="2.2.4" />
-    <PackageReference Include="Fanex.Data" Version="4.2.6-beta3" />
-    <PackageReference Include="Fanex.Data.Repository" Version="4.2.6-beta3" />
-    <PackageReference Include="Fanex.Data.SqlServer" Version="4.2.6-beta3" />
+    <PackageReference Include="Fanex.Caching.Redis" Version="2.2.5" />
+    <PackageReference Include="Fanex.Caching.Redis.AspNetCore" Version="2.2.5" />
+    <PackageReference Include="Fanex.Data" Version="4.2.6" />
+    <PackageReference Include="Fanex.Data.Repository" Version="4.2.6" />
+    <PackageReference Include="Fanex.Data.SqlServer" Version="4.2.6" />
     <PackageReference Include="Fanex.Logging.Extensions.AspNetCore" Version="1.0.1" />
     <PackageReference Include="Fanex.Logging.Extensions.Database" Version="1.0.8" />
     <PackageReference Include="Fanex.Logging.Sentry.RavenClient" Version="1.0.1.2" />
