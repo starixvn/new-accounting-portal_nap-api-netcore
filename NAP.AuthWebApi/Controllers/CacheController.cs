@@ -1,5 +1,9 @@
 ﻿namespace NAP.AuthWebApi.Controllers;
 
+using Microsoft.AspNetCore.Authorization;
+using System.Diagnostics;
+using System.Runtime;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Nap.Auth.DataCachingPull;
 using Nap.Auth.DataCachingPush;
@@ -60,7 +64,6 @@ public class CacheController(CachingReloadService dataCachingService, MemoryCach
 
         return dataCachingService.CacheVersion;
     }
-
 
     #region Debug
 
@@ -137,4 +140,33 @@ public class CacheController(CachingReloadService dataCachingService, MemoryCach
     }
 
     #endregion
+
+    [AllowAnonymous]
+    [HttpGet]
+    public IActionResult Gc()
+    {
+        const int megabyte = 1024 * 1024;
+        var stringBuilder = new StringBuilder();
+        var sw = Stopwatch.StartNew();
+        sw.Start();
+
+        using var currentProcess = Process.GetCurrentProcess();
+        currentProcess.Refresh();
+        var memory = currentProcess.WorkingSet64 / megabyte;
+
+        stringBuilder.Append($"Total memory - Before GC.Collect: {memory} Mb");
+
+        GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+        GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, true, true);
+        GC.WaitForPendingFinalizers();
+        GC.WaitForFullGCComplete();
+
+        currentProcess.Refresh();
+        memory = currentProcess.WorkingSet64 / megabyte;
+
+        var duration = sw.ElapsedMilliseconds;
+        stringBuilder.Append($"GC.Collected. Usage memory = {memory}. Duration: {duration} milliseconds");
+
+        return Ok(stringBuilder.ToString());
+    }
 }

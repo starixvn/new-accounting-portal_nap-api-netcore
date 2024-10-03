@@ -9,7 +9,6 @@ namespace Nap.Auth.Service;
 using System.Globalization;
 using DataCachingPull;
 using Microsoft.Extensions.Configuration;
-using Nap.Auth.DataCachingPush;
 using ONEbook.UM.Services;
 
 public interface UserService
@@ -48,7 +47,6 @@ public class UserServiceImp(
     IMaintenanceService maintenanceService,
     IDynamicRepository repository,
     MemoryCachingStorage cachingService,
-    CachingReloadService dataCachingService,
     OtpService otpService) : UserService
 {
     #region Caching User
@@ -190,6 +188,11 @@ public class UserServiceImp(
 
     public async Task<string> UserSsoGetTimeAsync()
     {
+        if (await maintenanceService.IsUnderMaintenanceAsync())
+        {
+            return DateTime.Now.ToString(CultureInfo.InvariantCulture);
+        }
+
         var command = new UserSsoGetTimeUserCommand
         {
             Time = DateTime.Now
@@ -218,7 +221,6 @@ public class UserServiceImp(
         };
 
         await repository.ExecuteAsync(command).ConfigureAwait(false);
-        await dataCachingService.ReloadUsers();
         return command.ErrCode == 0;
     }
 
@@ -293,6 +295,11 @@ public class UserServiceImp(
             return;
         }
 
+        if (await maintenanceService.IsUnderMaintenanceAsync())
+        {
+            return;
+        }
+
         await repository.ExecuteAsync(command).ConfigureAwait(false);
     }
 
@@ -303,12 +310,23 @@ public class UserServiceImp(
             return;
         }
 
+        if (await maintenanceService.IsUnderMaintenanceAsync())
+        {
+            return;
+        }
+
         await repository.ExecuteAsync(command).ConfigureAwait(false);
     }
 
     public async Task UserSsoCheckInAsync(UserSsoCheckInUserCommand command)
     {
         if (configuration.GetValue<int>("DisableDbLog") == 1)
+        {
+            command.OnUserId = command.UserId;
+            return;
+        }
+
+        if (await maintenanceService.IsUnderMaintenanceAsync())
         {
             command.OnUserId = command.UserId;
             return;
