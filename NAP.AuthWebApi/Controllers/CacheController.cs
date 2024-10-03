@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 [ApiController]
 [Route("cache")]
-public class CacheController(CachingReloaderService dataCachingService, MemoryCachingStorage storage) : ControllerBase
+public class CacheController(CachingReloadService dataCachingService, MemoryCachingStorage storage) : ControllerBase
 {
     [HttpGet]
     [Route("")]

@@ -37,18 +37,25 @@ public class UserController(UserService userService,
         return await userService.GetBySiteAsync(siteId, isActive).ConfigureAwait(false);
     }
 
+    [HttpGet]
+    [Route("bysiteandfunction")]
+    public IEnumerable<UserFunctionPolicy> GetBySiteAndFunctionKey(string functionKey, int siteId)
+    {
+        return userService.GetBySiteAndFunctionKey(functionKey, siteId);
+    }
+
     [Route("{userId:int}/permission")]
     [HttpGet]
-    public async Task<int> GetPermission(int userId, int siteId, string functionKey)
+    public int GetPermission(int userId, int siteId, string functionKey)
     {
-        return await userService.GetUserSiteFunctionKeyPolicyAsync(userId, siteId, functionKey).ConfigureAwait(false);
+        return userService.GetUserSiteFunctionKeyPolicy(userId, siteId, functionKey);
     }
 
     [Route("{userId:int}/permissions")]
     [HttpGet]
-    public async Task<IEnumerable<FunctionPolicy>> FunctionPolicies(int userId, int siteId, string parentFunctionKey = "", string environment= Constant.Uat)
+    public IEnumerable<FunctionPolicy> FunctionPolicies(int userId, int siteId, string parentFunctionKey = "", string environment = Constant.Uat)
     {
-        var functionPolicies = await functionService.GetByUserAndSiteIncludeGroupAsync(userId, siteId, environment).ConfigureAwait(false);
+        var functionPolicies = functionService.GetByUserAndSiteIncludeGroup(userId, siteId, environment);
 
         return string.IsNullOrEmpty(parentFunctionKey)
             ? functionPolicies :
@@ -57,23 +64,23 @@ public class UserController(UserService userService,
 
     [Route("{userId:int}/menuItem")]
     [HttpGet]
-    public async Task<IEnumerable<MenuItem>> MenuItem(int userId, int siteId, string environment)
+    public IEnumerable<MenuItem> MenuItem(int userId, int siteId, string environment)
     {
-        return await menuItemService.GetByUserAndSiteAsync(userId, siteId, environment).ConfigureAwait(false);
+        return menuItemService.GetByUserAndSite(userId, siteId, environment);
     }
 
     [Route("{userId:int}/sitelevel")]
     [HttpGet]
-    public async Task<IEnumerable<SiteLevel>> SiteLevel(int userId, string environment)
+    public IEnumerable<SiteLevel> SiteLevel(int userId, string environment)
     {
-        return await siteService.GetSiteLevelByUserAsync(userId, environment).ConfigureAwait(false);
+        return siteService.GetSiteLevelByUser(userId, environment);
     }
 
     [HttpGet]
     [Route("{userId:int}/levelonsite/{siteId:int}")]
-    public async Task<int> LevelOnSite(int userId, int siteId)
+    public int LevelOnSite(int userId, int siteId)
     {
-        return await userService.GetUserSiteLevelAsync(userId, siteId);
+        return userService.GetUserSiteLevel(userId, siteId);
     }
 
     [Route("{userId:int}/verify-otp")]

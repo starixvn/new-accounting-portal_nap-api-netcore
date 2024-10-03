@@ -10,8 +10,8 @@ public class GroupController(GroupService groupService) : ControllerBase
 {
     [Route("{id:int}")]
     [HttpGet]
-    public async Task<Group> Get(int id)
+    public Group Get(int id)
     {
-        return await groupService.GetByIdAsync(id).ConfigureAwait(false);
+        return groupService.GetById(id);
     }
 }

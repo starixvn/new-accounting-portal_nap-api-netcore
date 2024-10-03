@@ -32,9 +32,11 @@ public interface UserService
 
     Task<IEnumerable<User>> GetBySiteAsync(int siteId = 0, bool? isActive = true);
 
-    Task<int> GetUserSiteLevelAsync(int userId, int siteId);
+    List<UserFunctionPolicy> GetBySiteAndFunctionKey(string functionKey, int siteId);
 
-    Task<int> GetUserSiteFunctionKeyPolicyAsync(int userId, int siteId, string functionKey);
+    int GetUserSiteLevel(int userId, int siteId);
+
+    int GetUserSiteFunctionKeyPolicy(int userId, int siteId, string functionKey);
 
     Task<bool> IgnoredOtpAsync(int userId, string system);
 
@@ -46,7 +48,7 @@ public class UserServiceImp(
     IMaintenanceService maintenanceService,
     IDynamicRepository repository,
     MemoryCachingStorage cachingService,
-    CachingReloaderService dataCachingService,
+    CachingReloadService dataCachingService,
     OtpService otpService) : UserService
 {
     #region Caching User
@@ -103,21 +105,25 @@ public class UserServiceImp(
         return users.Select(u => u.ToNonNullUser());
     }
 
+    public List<UserFunctionPolicy> GetBySiteAndFunctionKey(string functionKey, int siteId)
+    {
+        return cachingService.GetUserFunctionPolicies(functionKey, siteId).ToList();
+    }
+    
     #endregion
 
     #region SiteLevel
 
-    public async Task<int> GetUserSiteLevelAsync(int userId, int siteId)
+    public int GetUserSiteLevel(int userId, int siteId)
     {
         var siteLevels = cachingService.GetUserLevels(userId)
             .Where(s => s.IsActive && s.SiteId == siteId)
             .Select(s => s.Level)
             .ToArray();
-        var level = siteLevels.Length > 0 ? siteLevels.Max() : 0;
-        return await Task.FromResult(level);
+        return siteLevels.Length > 0 ? siteLevels.Max() : 0;
     }
 
-    public async Task<int> GetUserSiteFunctionKeyPolicyAsync(int userId, int siteId, string functionKey)
+    public int GetUserSiteFunctionKeyPolicy(int userId, int siteId, string functionKey)
     {
         var policies = cachingService.GetUserFunctions(userId, siteId)
             .Where(f => f.Key == functionKey)
@@ -125,7 +131,8 @@ public class UserServiceImp(
             .ToArray();
 
         var policy = policies.Length > 0 ? policies.Max() : 0;
-        return await Task.FromResult(policy);
+
+        return policy;
     }
 
     #endregion

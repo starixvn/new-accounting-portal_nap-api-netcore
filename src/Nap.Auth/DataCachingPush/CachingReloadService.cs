@@ -2,7 +2,7 @@
 
 using Fanex.Caching;
 
-public interface CachingReloaderService
+public interface CachingReloadService
 {
     Task ReloadSites();
 
@@ -24,7 +24,7 @@ public interface CachingReloaderService
 }
 
 
-public class CachingReloaderServiceImp(DataBatchLoadingService repository, ICache cache) : CachingReloaderService
+public class CachingReloadServiceImp(DataBatchLoadingService repository, ICache cache) : CachingReloadService
 {
     private const string CacheVersionKey = "NAP_API_CACHE_VERSION";
 
