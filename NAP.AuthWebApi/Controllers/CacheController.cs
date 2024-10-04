@@ -1,9 +1,5 @@
 ﻿namespace NAP.AuthWebApi.Controllers;
 
-using Microsoft.AspNetCore.Authorization;
-using System.Diagnostics;
-using System.Runtime;
-using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Nap.Auth.DataCachingPull;
 using Nap.Auth.DataCachingPush;
@@ -11,12 +7,13 @@ using Newtonsoft.Json;
 
 [ApiController]
 [Route("cache")]
-public class CacheController(CachingReloadService dataCachingService, MemoryCachingStorage storage) : ControllerBase
+public class CacheController(CachingReloadService dataCachingService, MemoryCachingStorage storage, Fanex.Logging.ILogger logger) : ControllerBase
 {
     [HttpGet]
     [Route("")]
     public async Task<IActionResult> Action(string command, int siteId)
     {
+        await logger.InfoAsync($"Command: {command}. SiteId: {siteId} at {DateTimeOffset.Now}");
         var jobCommand = new JobCommand(command, siteId);
         var cacheVersion = await SolveCommand(jobCommand);
 
@@ -27,10 +24,12 @@ public class CacheController(CachingReloadService dataCachingService, MemoryCach
     [Route("reload")]
     public async Task<IActionResult> Reload()
     {
+        var oldCacheVersion = dataCachingService.CacheVersion;
         await dataCachingService.ReloadAll();
-        var cacheVersion = dataCachingService.CacheVersion;
+        var newCacheVersion = dataCachingService.CacheVersion;
 
-        return Content(cacheVersion);
+        await logger.InfoAsync($"Reload Old: {oldCacheVersion} - New: {newCacheVersion} at {DateTimeOffset.Now}");
+        return Content($"Old: {oldCacheVersion} - New: {newCacheVersion}");
     }
     
     private async Task<string> SolveCommand(JobCommand command)
@@ -140,33 +139,4 @@ public class CacheController(CachingReloadService dataCachingService, MemoryCach
     }
 
     #endregion
-
-    [AllowAnonymous]
-    [HttpGet]
-    public IActionResult Gc()
-    {
-        const int megabyte = 1024 * 1024;
-        var stringBuilder = new StringBuilder();
-        var sw = Stopwatch.StartNew();
-        sw.Start();
-
-        using var currentProcess = Process.GetCurrentProcess();
-        currentProcess.Refresh();
-        var memory = currentProcess.WorkingSet64 / megabyte;
-
-        stringBuilder.Append($"Total memory - Before GC.Collect: {memory} Mb");
-
-        GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
-        GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, true, true);
-        GC.WaitForPendingFinalizers();
-        GC.WaitForFullGCComplete();
-
-        currentProcess.Refresh();
-        memory = currentProcess.WorkingSet64 / megabyte;
-
-        var duration = sw.ElapsedMilliseconds;
-        stringBuilder.Append($"GC.Collected. Usage memory = {memory}. Duration: {duration} milliseconds");
-
-        return Ok(stringBuilder.ToString());
-    }
 }

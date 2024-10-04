@@ -1,6 +1,7 @@
 using System.Net.Mime;
 using Fanex.Data;
 using Fanex.Data.SqlServer;
+using Fanex.Logging;
 using Fanex.Logging.Extensions.Database;
 using Microsoft.AspNetCore.Diagnostics;
 using NAP.AuthWebApi;
@@ -27,9 +28,9 @@ services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 
 var app = builder.Build();
-
 app.UseSwagger();
 app.UseSwaggerUI();
+
 app.UseExceptionHandler(exceptionHandlerApp =>
 {
     exceptionHandlerApp.Run(async context =>
@@ -40,13 +41,17 @@ app.UseExceptionHandler(exceptionHandlerApp =>
 
         var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
         var error = contextFeature?.Error;
+        await context.Response.WriteAsync($"\nErrorMessage:{error.Message}.\r\n");
         if (error is ObjectDbException)
         {
-            await context.Response.WriteAsync($"\nErrorMessage:{error.Message}. DATABASE INFO: \n");
+            await context.Response.WriteAsync($"DATABASE INFO: \n");
             var dataDbExceptionInfo = DatabaseInfoGetters.GetDbExceptionInfo(error);
             var json = JsonConvert.SerializeObject(dataDbExceptionInfo);
             await context.Response.WriteAsync(json);
         }
+
+        await Logger.Log.ErrorAsync("An exception was thrown.", error);
+        Console.WriteLine($"{error.Message}\r\n{error.Source}\r\n{error.StackTrace}");
     });
 });
 app.MapControllers();

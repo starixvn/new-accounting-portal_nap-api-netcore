@@ -34,6 +34,8 @@ public class Function
             IsActive = IsActive,
             Name = StringUtility.ToNonNull(Name),
             Key = StringUtility.ToNonNull(Key),
+            SiteId= SiteId,
+            SiteName = SiteName,
             ParentName = StringUtility.ToNonNull(ParentName),
             Environment = StringUtility.ToNonNull(Environment)
         };

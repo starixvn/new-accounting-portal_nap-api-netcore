@@ -51,7 +51,14 @@ public class CachingReloadServiceImp(DataBatchLoadingService repository, ICache 
         internal const string Sites = "NAP_API_ALL_SITES";
     }
 
-    public string CacheVersion { get; private set; }
+    public string CacheVersion
+    {
+        get
+        {
+            cache.TryGet<string>(NapApiCacheKey.CacheVersion, out var  cacheVersion);
+            return cacheVersion;
+        }
+    }
 
     public async Task ReloadAll()
     {
@@ -130,8 +137,6 @@ public class CachingReloadServiceImp(DataBatchLoadingService repository, ICache 
     private async Task SaveCacheVersion()
     {
         var version = $"{Guid.NewGuid()}-{DateTime.Now:yyyy-MM-dd-HH:mm:ss}";
-        CacheVersion = version ;
-
         await cache.SetAsync(CacheVersionKey, version, cacheOptions);
     }
 }
