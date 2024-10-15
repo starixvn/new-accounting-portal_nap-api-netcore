@@ -41,7 +41,7 @@ app.UseExceptionHandler(exceptionHandlerApp =>
 
         var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
         var error = contextFeature?.Error;
-        await context.Response.WriteAsync($"\nErrorMessage:{error.Message}.\r\n");
+        await context.Response.WriteAsync($"\nErrorMessage:{error?.Message}.\r\n");
         if (error is ObjectDbException)
         {
             await context.Response.WriteAsync($"DATABASE INFO: \n");
@@ -51,7 +51,7 @@ app.UseExceptionHandler(exceptionHandlerApp =>
         }
 
         await Logger.Log.ErrorAsync("An exception was thrown.", error);
-        Console.WriteLine($"{error.Message}\r\n{error.Source}\r\n{error.StackTrace}");
+        Console.WriteLine($"{error?.Message}\r\n{error.Source}\r\n{error.StackTrace}");
     });
 });
 app.MapControllers();
