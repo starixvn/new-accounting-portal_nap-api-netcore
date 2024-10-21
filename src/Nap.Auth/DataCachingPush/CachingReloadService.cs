@@ -136,7 +136,7 @@ public class CachingReloadServiceImp(DataBatchLoadingService repository, ICache 
 
     private async Task SaveCacheVersion()
     {
-        var version = $"{Guid.NewGuid()}-{DateTime.Now:yyyy-MM-dd-HH:mm:ss}";
+        var version = $"{Guid.NewGuid()}-{DateTimeOffset.Now.DateTime:yyyy-MM-dd-HH:mm:ss}";
         await cache.SetAsync(CacheVersionKey, version, cacheOptions);
     }
 }

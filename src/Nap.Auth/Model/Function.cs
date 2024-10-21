@@ -14,7 +14,7 @@ public class Function
 
     public string ParentName { get; set; } = string.Empty;
 
-    public int SiteId { get; set; } = 0;
+    public int SiteId { get; set; }
 
     public string SiteName { get; set; } = string.Empty;
 

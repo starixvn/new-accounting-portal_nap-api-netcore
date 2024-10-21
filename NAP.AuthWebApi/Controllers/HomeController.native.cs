@@ -14,8 +14,7 @@ public class HomeController(ICache cache) : ControllerBase
 {
     [Route("")]
     [HttpGet]
-    public string Index() => "Swagger link: /swagger/index.html";
-
+    public string Index() => $"Welcome to Nap API. Now is {DateTimeOffset.Now}. Swagger link: /swagger/index.html";
 
     [Route("Verify")]
     [HttpGet]

@@ -44,14 +44,14 @@ app.UseExceptionHandler(exceptionHandlerApp =>
         await context.Response.WriteAsync($"\nErrorMessage:{error?.Message}.\r\n");
         if (error is ObjectDbException)
         {
-            await context.Response.WriteAsync($"DATABASE INFO: \n");
+            await context.Response.WriteAsync("DATABASE INFO: \n");
             var dataDbExceptionInfo = DatabaseInfoGetters.GetDbExceptionInfo(error);
             var json = JsonConvert.SerializeObject(dataDbExceptionInfo);
             await context.Response.WriteAsync(json);
         }
 
         await Logger.Log.ErrorAsync("An exception was thrown.", error);
-        Console.WriteLine($"{error?.Message}\r\n{error.Source}\r\n{error.StackTrace}");
+        Console.WriteLine($"{error?.Message}\r\n{error?.Source}\r\n{error?.StackTrace}");
     });
 });
 app.MapControllers();

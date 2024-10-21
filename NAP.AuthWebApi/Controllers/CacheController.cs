@@ -58,6 +58,7 @@ public class CacheController(CachingReloadService dataCachingService, MemoryCach
                 await dataCachingService.ReloadUserSiteLevels();
                 break;
             default:
+                await Task.Delay(10);
                 break;
         }
 

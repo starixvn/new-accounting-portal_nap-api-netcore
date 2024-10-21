@@ -85,7 +85,7 @@ public class UserServiceImp(
         return user.ToNonNullUser();
     }
 
-    public async Task<IEnumerable<User>> GetBySiteAsync(int siteId = 0, bool? isActive = default)
+    public async Task<IEnumerable<User>> GetBySiteAsync(int siteId = 0, bool? isActive = true)
     {
         if (await maintenanceService.IsUnderMaintenanceAsync())
         {
@@ -190,12 +190,12 @@ public class UserServiceImp(
     {
         if (await maintenanceService.IsUnderMaintenanceAsync())
         {
-            return DateTime.Now.ToString(CultureInfo.InvariantCulture);
+            return DateTimeOffset.Now.DateTime.ToString(CultureInfo.InvariantCulture);
         }
 
         var command = new UserSsoGetTimeUserCommand
         {
-            Time = DateTime.Now
+            Time = DateTimeOffset.Now.DateTime
         };
 
         await repository.ExecuteAsync(command).ConfigureAwait(false);
@@ -214,7 +214,7 @@ public class UserServiceImp(
             CurrentUserId = userId,
             CustId = userId,
             CurrentSiteId = siteId,
-            LogDate = DateTime.Now,
+            LogDate = DateTimeOffset.Now.DateTime,
             UserPwd = password,
             LoginIp = loginIp
 
