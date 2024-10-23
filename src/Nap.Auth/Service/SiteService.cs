@@ -7,17 +7,18 @@ using DataCachingPull;
 
 public interface SiteService
 {
-    Task<IEnumerable<SiteLevel>> GetSiteLevelByUserAsync(int userId, string env = Constant.Uat);
+    IEnumerable<SiteLevel> GetSiteLevelByUser(int userId, string env = Constant.Uat);
 }
 
 public class SiteServiceImp(MemoryCachingStorage cachingService) : SiteService
 {
-    public async Task<IEnumerable<SiteLevel>> GetSiteLevelByUserAsync(int userId, string env = Constant.Uat)
+    public IEnumerable<SiteLevel> GetSiteLevelByUser(int userId, string env = Constant.Uat)
     {
         var siteLevels = cachingService.GetUserLevels(userId, env)
             .OrderBy(s=>s.Level)
             .ThenBy(s=>s.IsActive)
             .ToList();
-        return await Task.FromResult(siteLevels);
+
+        return siteLevels;
     }
 }

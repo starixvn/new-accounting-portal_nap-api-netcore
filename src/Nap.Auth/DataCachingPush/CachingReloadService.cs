@@ -2,7 +2,7 @@
 
 using Fanex.Caching;
 
-public interface CachingReloaderService
+public interface CachingReloadService
 {
     Task ReloadSites();
 
@@ -24,7 +24,7 @@ public interface CachingReloaderService
 }
 
 
-public class CachingReloaderServiceImp(DataBatchLoadingService repository, ICache cache) : CachingReloaderService
+public class CachingReloadServiceImp(DataBatchLoadingService repository, ICache cache) : CachingReloadService
 {
     private const string CacheVersionKey = "NAP_API_CACHE_VERSION";
 
@@ -51,7 +51,14 @@ public class CachingReloaderServiceImp(DataBatchLoadingService repository, ICach
         internal const string Sites = "NAP_API_ALL_SITES";
     }
 
-    public string CacheVersion { get; private set; }
+    public string CacheVersion
+    {
+        get
+        {
+            cache.TryGet<string>(NapApiCacheKey.CacheVersion, out var  cacheVersion);
+            return cacheVersion;
+        }
+    }
 
     public async Task ReloadAll()
     {
@@ -129,9 +136,7 @@ public class CachingReloaderServiceImp(DataBatchLoadingService repository, ICach
 
     private async Task SaveCacheVersion()
     {
-        var version = $"{Guid.NewGuid()}-{DateTime.Now:yyyy-MM-dd-HH:mm:ss}";
-        CacheVersion = version ;
-
+        var version = $"{Guid.NewGuid()}-{DateTimeOffset.Now.DateTime:yyyy-MM-dd-HH:mm:ss}";
         await cache.SetAsync(CacheVersionKey, version, cacheOptions);
     }
 }

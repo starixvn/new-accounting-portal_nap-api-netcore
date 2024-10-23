@@ -7,12 +7,13 @@ using Newtonsoft.Json;
 
 [ApiController]
 [Route("cache")]
-public class CacheController(CachingReloaderService dataCachingService, MemoryCachingStorage storage) : ControllerBase
+public class CacheController(CachingReloadService dataCachingService, MemoryCachingStorage storage, Fanex.Logging.ILogger logger) : ControllerBase
 {
     [HttpGet]
     [Route("")]
     public async Task<IActionResult> Action(string command, int siteId)
     {
+        await logger.InfoAsync($"Command: {command}. SiteId: {siteId} at {DateTimeOffset.Now}");
         var jobCommand = new JobCommand(command, siteId);
         var cacheVersion = await SolveCommand(jobCommand);
 
@@ -23,10 +24,12 @@ public class CacheController(CachingReloaderService dataCachingService, MemoryCa
     [Route("reload")]
     public async Task<IActionResult> Reload()
     {
+        var oldCacheVersion = dataCachingService.CacheVersion;
         await dataCachingService.ReloadAll();
-        var cacheVersion = dataCachingService.CacheVersion;
+        var newCacheVersion = dataCachingService.CacheVersion;
 
-        return Content(cacheVersion);
+        await logger.InfoAsync($"Reload Old: {oldCacheVersion} - New: {newCacheVersion} at {DateTimeOffset.Now}");
+        return Content($"Old: {oldCacheVersion} - New: {newCacheVersion}");
     }
     
     private async Task<string> SolveCommand(JobCommand command)
@@ -55,12 +58,12 @@ public class CacheController(CachingReloaderService dataCachingService, MemoryCa
                 await dataCachingService.ReloadUserSiteLevels();
                 break;
             default:
+                await Task.Delay(10);
                 break;
         }
 
         return dataCachingService.CacheVersion;
     }
-
 
     #region Debug
 

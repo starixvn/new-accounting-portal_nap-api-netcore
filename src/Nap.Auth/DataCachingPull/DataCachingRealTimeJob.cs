@@ -128,11 +128,13 @@ public class DataCachingRealTimeJob(ICache cache, MemoryCachingStorage storage) 
         foreach (var siteId in siteIds)
         {
             var (found, policies) = await cache.TryGetAsync<List<BatchUserFunctionPolicy>>(NapApiCacheKey.UserFunctionPolicies + siteId);
-            if (found)
+            if (!found)
             {
-                policies ??= [];
-                storage.SetUserFunctionPolicies(siteId, policies);
+                continue;
             }
+
+            policies ??= [];
+            storage.SetUserFunctionPolicies(siteId, policies);
         }
     }
 

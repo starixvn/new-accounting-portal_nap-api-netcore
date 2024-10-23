@@ -25,6 +25,8 @@ public interface MemoryCachingStorage
     User GetUser(string username);
     List<User> GetUsers(int siteId, bool? isActive = null);
 
+    IEnumerable<UserFunctionPolicy> GetUserFunctionPolicies(string key, int siteId);
+
     #region Debug
     Dictionary<int, Dictionary<int, List<BatchUserFunctionPolicy>>> SiteUserFunctionPoliciesCache { get; }
     Dictionary<int, Dictionary<int, List<MenuItem>>> SiteUserMenuItemsCache { get; }
@@ -41,40 +43,22 @@ public interface MemoryCachingStorage
 
 public class MemoryCachingStorageImp : MemoryCachingStorage
 {
-    private readonly Dictionary<int, Dictionary<int, List<BatchUserFunctionPolicy>>> siteUserFunctionPoliciesCache = [];
-
-    private Dictionary<int, Dictionary<int, List<MenuItem>>> siteUserMenuItemsCache = [];
-
-    private Dictionary<int, Function> functionsCache = [];
-
-    private Dictionary<int, Group> groupsCache = [];
-
-    private Dictionary<int, List<BatchUserSiteLevel>> userSiteLevelsByUserCache = [];
-
-    private Dictionary<int, List<BatchUserSiteLevel>> userSiteLevelsBySiteCache = [];
-
-    private Dictionary<int, List<MenuItem>> siteMenuItemsCache = [];
-
-    private List<UserOtp> userOtpCache = [];
-
-    private List<User> usersCache = [];
-
     public void SetFunctions(List<Function> functions)
     {
-        functionsCache = functions.ToDictionary(f => f.Id, f => f.ToNonNullFunction());
+        FunctionsCache = functions.ToDictionary(f => f.Id, f => f.ToNonNullFunction());
     }
 
     public void SetGroups(List<Group> groups)
     {
-        groupsCache = groups.ToDictionary(f => f.Id, f => f.ToNonNullGroup());
+        GroupsCache = groups.ToDictionary(f => f.Id, f => f.ToNonNullGroup());
     }
 
     public void SetUserSiteLevels(List<BatchUserSiteLevel> siteLevels)
     {
-        userSiteLevelsByUserCache = siteLevels.GroupBy(f => f.UserId)
+        UserSiteLevelsByUserCache = siteLevels.GroupBy(f => f.UserId)
             .ToDictionary(f => f.Key, f => f.ToList());
 
-        userSiteLevelsBySiteCache = siteLevels.GroupBy(f => f.SiteId)
+        UserSiteLevelsBySiteCache = siteLevels.GroupBy(f => f.SiteId)
             .ToDictionary(f => f.Key, f => f.ToList());
     }
 
@@ -84,7 +68,7 @@ public class MemoryCachingStorageImp : MemoryCachingStorage
 
         var policiesByUsers = policies.GroupBy(p => p.UserId)
             .ToDictionary(p => p.Key, p => p.ToList());
-        siteUserFunctionPoliciesCache[siteId] = policiesByUsers;
+        SiteUserFunctionPoliciesCache[siteId] = policiesByUsers;
     }
 
     private void CalculateDerivativeValue(List<BatchUserFunctionPolicy> policies)
@@ -92,8 +76,8 @@ public class MemoryCachingStorageImp : MemoryCachingStorage
         var defaultFunction = new Function();
         policies.ForEach(policy =>
         {
-            var function = functionsCache.GetValueOrDefault(policy.FunctionId, defaultFunction);
-            var parentFunction = functionsCache.GetValueOrDefault(function.ParentId, defaultFunction);
+            var function = FunctionsCache.GetValueOrDefault(policy.FunctionId, defaultFunction);
+            var parentFunction = FunctionsCache.GetValueOrDefault(function.ParentId, defaultFunction);
             policy.Environment = function.Environment;
             policy.FunctionKey = function.Key;
             policy.FunctionName = function.Name;
@@ -105,21 +89,21 @@ public class MemoryCachingStorageImp : MemoryCachingStorage
 
     public void SetMenuItems(List<BatchMenuItem> menuItems)
     {
-        siteMenuItemsCache = menuItems.GroupBy(f => f.SiteId)
+        SiteMenuItemsCache = menuItems.GroupBy(f => f.SiteId)
             .ToDictionary(i => i.Key, i => i.Select(f => f.ToMenuItem()).ToList());
     }
 
     public void CalculateUserMenuItemPolicies()
     {
         var newSiteUserMenuItems = new Dictionary<int, Dictionary<int, List<MenuItem>>>();
-        foreach (var siteId in siteMenuItemsCache.Keys)
+        foreach (var siteId in SiteMenuItemsCache.Keys)
         {
-            if (!siteUserFunctionPoliciesCache.TryGetValue(siteId, out var policiesBySite))
+            if (!SiteUserFunctionPoliciesCache.TryGetValue(siteId, out var policiesBySite))
             {
                 continue;
             }
 
-            var menuItemsBySite = siteMenuItemsCache[siteId];
+            var menuItemsBySite = SiteMenuItemsCache[siteId];
             var newUserMenuItemsBySite = new Dictionary<int, List<MenuItem>>();
             foreach (var userId in policiesBySite.Keys)
             {
@@ -136,22 +120,22 @@ public class MemoryCachingStorageImp : MemoryCachingStorage
             newSiteUserMenuItems.Add(siteId, newUserMenuItemsBySite);
         }
 
-        siteUserMenuItemsCache = newSiteUserMenuItems;
+        SiteUserMenuItemsCache = newSiteUserMenuItems;
     }
 
     public void SetUserOtp(List<UserOtp> users)
     {
-        userOtpCache = users.ToList();
+        UserOtpCache = users.ToList();
     }
 
     public void SetUsers(List<User> users)
     {
-        usersCache = users.Select(u => u.ToNonNullUser()).ToList();
+        UsersCache = users.Select(u => u.ToNonNullUser()).ToList();
     }
 
     public List<FunctionPolicy> GetUserFunctions(int userId, int siteId, string env = Constant.Uat)
     {
-        if (!siteUserFunctionPoliciesCache.TryGetValue(siteId, out var policiesBySite))
+        if (!SiteUserFunctionPoliciesCache.TryGetValue(siteId, out var policiesBySite))
         {
             return [];
         }
@@ -169,7 +153,7 @@ public class MemoryCachingStorageImp : MemoryCachingStorage
 
     public List<MenuItem> GetUserMenuItems(int userId, int siteId, string env = Constant.Uat)
     {
-        if (!siteUserMenuItemsCache.TryGetValue(siteId, out var policiesBySite))
+        if (!SiteUserMenuItemsCache.TryGetValue(siteId, out var policiesBySite))
         {
             return [];
         }
@@ -184,23 +168,51 @@ public class MemoryCachingStorageImp : MemoryCachingStorage
             .ToList();
     }
 
+    public IEnumerable<UserFunctionPolicy> GetUserFunctionPolicies(string key, int siteId)
+    {
+        if (!SiteUserFunctionPoliciesCache.TryGetValue(siteId, out var users))
+        {
+            yield break;
+        }
+
+        var functionId = GetFunctionIdByKey(key, siteId);
+
+        foreach (var userId in users.Keys)
+        {
+            if (!users[userId].Exists(f => f.FunctionId == functionId))
+            {
+                continue;
+            }
+            var policy = users[userId]
+                .Where(f => f.FunctionId == functionId)
+                .Select(f => f.Policy)
+                .Max();
+            yield return new UserFunctionPolicy
+            {
+                UserId = userId,
+                FunctionId = functionId,
+                Policy = policy
+            };
+        }
+    }
+
     public int GetFunctionIdByKey(string key, int siteId)
     {
-        var function = functionsCache.Values.FirstOrDefault(f => f.Key == key && f.SiteId == siteId);
+        var function = FunctionsCache.Values.FirstOrDefault(f => string.Equals(f.Key, key, StringComparison.OrdinalIgnoreCase) && f.SiteId == siteId);
 
         return function?.Id ?? 0;
     }
 
     public Group GetGroup(int id)
     {
-        groupsCache.TryGetValue(id, out var group);
+        GroupsCache.TryGetValue(id, out var group);
 
         return group;
     }
 
     public List<SiteLevel> GetUserLevels(int userId, string env = Constant.Uat)
     {
-        if (!userSiteLevelsByUserCache.TryGetValue(userId, out var siteLevels))
+        if (!UserSiteLevelsByUserCache.TryGetValue(userId, out var siteLevels))
         {
             return [];
         }
@@ -217,7 +229,7 @@ public class MemoryCachingStorageImp : MemoryCachingStorage
 
     public List<MenuItem> GetSiteMenuItems(int siteId, string env = Constant.Uat, bool? isActive = null)
     {
-        if (!siteMenuItemsCache.TryGetValue(siteId, out var menuItems))
+        if (!SiteMenuItemsCache.TryGetValue(siteId, out var menuItems))
         {
             return [];
         }
@@ -229,27 +241,27 @@ public class MemoryCachingStorageImp : MemoryCachingStorage
 
     public UserOtp GetUserOtp(int userId, string system)
     {
-        var otp = userOtpCache.Find(o => o.CustId == userId && o.System == system);
+        var otp = UserOtpCache.Find(o => o.CustId == userId && string.Equals(o.System, system, StringComparison.OrdinalIgnoreCase));
         return otp ?? new UserOtp { IgnoreOtp = true };
     }
 
     public User GetUser(int id)
     {
-        var user = usersCache.Find(u => u.Id == id) ?? new User();
+        var user = UsersCache.Find(u => u.Id == id) ?? new User();
 
         return user.ToNonNullUser();
     }
 
     public User GetUser(string username)
     {
-        var user = usersCache.Find(u => u.Username == username) ?? new User();
+        var user = UsersCache.Find(u => string.Equals(u.Username, username, StringComparison.OrdinalIgnoreCase)) ?? new User();
 
         return user.ToNonNullUser();
     }
 
     public List<User> GetUsers(int siteId, bool? isActive = null)
     {
-        if (!userSiteLevelsBySiteCache.TryGetValue(siteId, out var userSiteLevels))
+        if (!UserSiteLevelsBySiteCache.TryGetValue(siteId, out var userSiteLevels))
         {
             return [];
         }
@@ -258,7 +270,7 @@ public class MemoryCachingStorageImp : MemoryCachingStorage
                 .Where(u => isActive == null || u.IsActive == isActive.Value)
                 .Select(u => u.UserId);
 
-        return usersCache.Where(u => userIds.Contains(u.Id))
+        return UsersCache.Where(u => userIds.Contains(u.Id))
             .Select(u => u.ToNonNullUser())
             .OrderBy(u => u.Id)
             .ToList();
@@ -272,24 +284,23 @@ public class MemoryCachingStorageImp : MemoryCachingStorage
 
     #region Debug
 
-    public Dictionary<int, Dictionary<int, List<BatchUserFunctionPolicy>>> SiteUserFunctionPoliciesCache =>
-        siteUserFunctionPoliciesCache;
+    public Dictionary<int, Dictionary<int, List<BatchUserFunctionPolicy>>> SiteUserFunctionPoliciesCache { get; } = [];
 
-    public Dictionary<int, Dictionary<int, List<MenuItem>>> SiteUserMenuItemsCache => siteUserMenuItemsCache;
+    public Dictionary<int, Dictionary<int, List<MenuItem>>> SiteUserMenuItemsCache { get; private set; } = [];
 
-    public Dictionary<int, Function> FunctionsCache => functionsCache;
+    public Dictionary<int, Function> FunctionsCache { get; private set; } = [];
 
-    public Dictionary<int, Group> GroupsCache => groupsCache;
+    public Dictionary<int, Group> GroupsCache { get; private set; } = [];
 
-    public Dictionary<int, List<BatchUserSiteLevel>> UserSiteLevelsByUserCache => userSiteLevelsByUserCache;
+    public Dictionary<int, List<BatchUserSiteLevel>> UserSiteLevelsByUserCache { get; private set; } = [];
 
-    public Dictionary<int, List<BatchUserSiteLevel>> UserSiteLevelsBySiteCache => userSiteLevelsBySiteCache;
+    public Dictionary<int, List<BatchUserSiteLevel>> UserSiteLevelsBySiteCache { get; private set; } = [];
 
-    public Dictionary<int, List<MenuItem>> SiteMenuItemsCache => siteMenuItemsCache;
+    public Dictionary<int, List<MenuItem>> SiteMenuItemsCache { get; private set; } = [];
 
-    public List<UserOtp> UserOtpCache => userOtpCache;
+    public List<UserOtp> UserOtpCache { get; private set; } = [];
 
-    public List<User> UsersCache => usersCache;
+    public List<User> UsersCache { get; private set; } = [];
 
     #endregion
 }
