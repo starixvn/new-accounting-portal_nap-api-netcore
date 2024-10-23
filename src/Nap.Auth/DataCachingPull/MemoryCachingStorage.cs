@@ -198,7 +198,7 @@ public class MemoryCachingStorageImp : MemoryCachingStorage
 
     public int GetFunctionIdByKey(string key, int siteId)
     {
-        var function = FunctionsCache.Values.FirstOrDefault(f => f.Key == key && f.SiteId == siteId);
+        var function = FunctionsCache.Values.FirstOrDefault(f => string.Equals(f.Key, key, StringComparison.OrdinalIgnoreCase) && f.SiteId == siteId);
 
         return function?.Id ?? 0;
     }
@@ -241,7 +241,7 @@ public class MemoryCachingStorageImp : MemoryCachingStorage
 
     public UserOtp GetUserOtp(int userId, string system)
     {
-        var otp = UserOtpCache.Find(o => o.CustId == userId && o.System == system);
+        var otp = UserOtpCache.Find(o => o.CustId == userId && string.Equals(o.System, system, StringComparison.OrdinalIgnoreCase));
         return otp ?? new UserOtp { IgnoreOtp = true };
     }
 
@@ -254,7 +254,7 @@ public class MemoryCachingStorageImp : MemoryCachingStorage
 
     public User GetUser(string username)
     {
-        var user = UsersCache.Find(u => u.Username == username) ?? new User();
+        var user = UsersCache.Find(u => string.Equals(u.Username, username, StringComparison.OrdinalIgnoreCase)) ?? new User();
 
         return user.ToNonNullUser();
     }

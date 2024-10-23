@@ -284,6 +284,12 @@ public class UserServiceImp(
             return;
         }
 
+        if (await maintenanceService.IsUnderMaintenanceAsync())
+        {
+            command.OnUserId = command.UserId;
+            return;
+        }
+
         await repository.ExecuteAsync(command).ConfigureAwait(false);
         await InsertLogUserLogin(command).ConfigureAwait(false);
     }

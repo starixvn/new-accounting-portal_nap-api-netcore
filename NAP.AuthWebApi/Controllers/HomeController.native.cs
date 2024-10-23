@@ -7,10 +7,12 @@ using System.Runtime;
 using System.Text;
 using Fanex.Caching;
 using Microsoft.AspNetCore.Authorization;
+using ONEbook.UM.Models;
+using ONEbook.UM.Services;
 
 [ApiController]
 [Route("")]
-public class HomeController(ICache cache) : ControllerBase
+public class HomeController(ICache cache, IMaintenanceService maintenanceService) : ControllerBase
 {
     [Route("")]
     [HttpGet]
@@ -24,6 +26,13 @@ public class HomeController(ICache cache) : ControllerBase
         await cache.SetAsync("VERIFY-CACHE", DateTimeOffset.Now.ToString(), cacheOptions);
         var (_, value) = await cache.TryGetAsync<string>("VERIFY-CACHE");
         return value;
+    }
+
+    [Route("IsUm")]
+    [HttpGet]
+    public async Task<Dictionary<int, UnderMaintenanceTime>> IsUm()
+    {
+        return await maintenanceService.GetAllUnderMaintenanceTimeAsync();
     }
 
     [AllowAnonymous]
