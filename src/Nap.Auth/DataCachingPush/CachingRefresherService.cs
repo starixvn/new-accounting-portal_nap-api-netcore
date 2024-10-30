@@ -2,29 +2,29 @@
 
 using Fanex.Caching;
 
-public interface CachingReloadService
+public interface CachingRefresherService
 {
-    Task ReloadSites();
+    Task RefreshSites();
 
-    Task ReloadAll();
+    Task RefreshAll();
 
-    Task ReloadFunctions();
+    Task RefreshFunctions();
 
-    Task ReloadGroups();
+    Task RefreshGroups();
 
-    Task ReloadUserSiteLevels();
+    Task RefreshUserSiteLevels();
 
-    Task ReloadUserFunctionPolicy(int siteId = 0);
+    Task RefreshUserFunctionPolicy(int siteId = 0);
 
-    Task ReloadSiteMenu();
+    Task RefreshSiteMenu();
 
-    Task ReloadUsers();
+    Task RefreshUsers();
 
     string CacheVersion { get; }
 }
 
 
-public class CachingReloadServiceImp(DataBatchLoadingService repository, ICache cache) : CachingReloadService
+public class CachingRefresherServiceImp(DataBatchLoadingService repository, ICache cache) : CachingRefresherService
 {
     private const string CacheVersionKey = "NAP_API_CACHE_VERSION";
 
@@ -60,18 +60,18 @@ public class CachingReloadServiceImp(DataBatchLoadingService repository, ICache 
         }
     }
 
-    public async Task ReloadAll()
+    public async Task RefreshAll()
     {
-        await ReloadSites();
-        await ReloadFunctions();
-        await ReloadGroups();
-        await ReloadSiteMenu();
-        await ReloadUserSiteLevels();
-        await ReloadUserFunctionPolicy();
-        await ReloadUsers();
+        await RefreshSites();
+        await RefreshFunctions();
+        await RefreshGroups();
+        await RefreshSiteMenu();
+        await RefreshUserSiteLevels();
+        await RefreshUserFunctionPolicy();
+        await RefreshUsers();
     }
 
-    public async Task ReloadSites()
+    public async Task RefreshSites()
     {
         var sites = await repository.GetSites();
 
@@ -79,7 +79,7 @@ public class CachingReloadServiceImp(DataBatchLoadingService repository, ICache 
         await SaveCacheVersion();
     }
 
-    public async Task ReloadFunctions()
+    public async Task RefreshFunctions()
     {
         var functionList = (await repository.GetFunctions()).Select(f => f.ToNonNullFunction())
             .ToList();
@@ -87,7 +87,7 @@ public class CachingReloadServiceImp(DataBatchLoadingService repository, ICache 
         await SaveCacheVersion();
     }
 
-    public async Task ReloadGroups()
+    public async Task RefreshGroups()
     {
         var groupList = (await repository.GetGroups()).Select(u => u.ToNonNullGroup())
             .ToList();
@@ -96,7 +96,7 @@ public class CachingReloadServiceImp(DataBatchLoadingService repository, ICache 
         await SaveCacheVersion();
     }
 
-    public async Task ReloadUserSiteLevels()
+    public async Task RefreshUserSiteLevels()
     {
         var siteLevelList = await repository.GetUserSiteLevels();
 
@@ -104,7 +104,7 @@ public class CachingReloadServiceImp(DataBatchLoadingService repository, ICache 
         await SaveCacheVersion();
     }
 
-    public async Task ReloadUserFunctionPolicy(int siteId = 0)
+    public async Task RefreshUserFunctionPolicy(int siteId = 0)
     {
         var policies = await repository.GetUserFunctionPolicies(siteId);
         var policiesBySite = policies.GroupBy(p => p.SiteId)
@@ -116,7 +116,7 @@ public class CachingReloadServiceImp(DataBatchLoadingService repository, ICache 
         await SaveCacheVersion();
     }
 
-    public async Task ReloadSiteMenu()
+    public async Task RefreshSiteMenu()
     {
         var menuItems = (await repository.GetAllMenuItems())
             .Select(m => m.ToNonNullMenuItem())
@@ -125,7 +125,7 @@ public class CachingReloadServiceImp(DataBatchLoadingService repository, ICache 
         await SaveCacheVersion();
     }
 
-    public async Task ReloadUsers()
+    public async Task RefreshUsers()
     {
         var users = (await repository.GetAllUsers())
             .Select(u => u.ToNonNullUser())
@@ -136,7 +136,7 @@ public class CachingReloadServiceImp(DataBatchLoadingService repository, ICache 
 
     private async Task SaveCacheVersion()
     {
-        var version = $"{Guid.NewGuid()}-{DateTimeOffset.Now.DateTime:yyyy-MM-dd-HH:mm:ss}";
+        var version = $"{Guid.NewGuid()}-{DateTimeOffset.Now:yyyy-MM-dd-HH:mm:ss} - GMT+{DateTimeOffset.Now.Offset.Hours}";
         await cache.SetAsync(CacheVersionKey, version, cacheOptions);
     }
 }

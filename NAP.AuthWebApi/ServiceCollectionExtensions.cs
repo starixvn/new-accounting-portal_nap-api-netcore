@@ -64,7 +64,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddNapApiCachingServices(this IServiceCollection services)
     {
         services.AddSingleton<DataBatchLoadingService, DataBatchLoadingServiceImp>();
-        services.AddSingleton<CachingReloadService, CachingReloadServiceImp>();
+        services.AddSingleton<CachingRefresherService, CachingRefresherServiceImp>();
         services.AddSingleton<MemoryCachingStorage, MemoryCachingStorageImp>();
         services.AddSingleton<DataCachingRealTimeJob>();
         services.AddHostedService<DataCachingRealTimeJob>();

@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 [ApiController]
 [Route("cache")]
-public class CacheController(CachingReloadService dataCachingService, MemoryCachingStorage storage, Fanex.Logging.ILogger logger) : ControllerBase
+public class CacheController(CachingRefresherService dataCachingService, MemoryCachingStorage storage, Fanex.Logging.ILogger logger) : ControllerBase
 {
     [HttpGet]
     [Route("")]
@@ -25,7 +25,7 @@ public class CacheController(CachingReloadService dataCachingService, MemoryCach
     public async Task<IActionResult> Reload()
     {
         var oldCacheVersion = dataCachingService.CacheVersion;
-        await dataCachingService.ReloadAll();
+        await dataCachingService.RefreshAll();
         var newCacheVersion = dataCachingService.CacheVersion;
 
         await logger.InfoAsync($"Reload Old: {oldCacheVersion} - New: {newCacheVersion} at {DateTimeOffset.Now}");
@@ -37,25 +37,25 @@ public class CacheController(CachingReloadService dataCachingService, MemoryCach
         switch (command.Command)
         {
             case JobCommand.Site:
-                await dataCachingService.ReloadSites();
+                await dataCachingService.RefreshSites();
                 break;
             case JobCommand.Function:
-                await dataCachingService.ReloadFunctions();
+                await dataCachingService.RefreshFunctions();
                 break;
             case JobCommand.Group:
-                await dataCachingService.ReloadGroups();
+                await dataCachingService.RefreshGroups();
                 break;
             case JobCommand.Menu:
-                await dataCachingService.ReloadSiteMenu();
+                await dataCachingService.RefreshSiteMenu();
                 break;
             case JobCommand.UserFunctionPolicy:
-                await dataCachingService.ReloadUserFunctionPolicy(command.SiteId);
+                await dataCachingService.RefreshUserFunctionPolicy(command.SiteId);
                 break;
             case JobCommand.User:
-                await dataCachingService.ReloadUsers();
+                await dataCachingService.RefreshUsers();
                 break;
             case JobCommand.UserSiteLevel:
-                await dataCachingService.ReloadUserSiteLevels();
+                await dataCachingService.RefreshUserSiteLevels();
                 break;
             default:
                 await Task.Delay(10);
