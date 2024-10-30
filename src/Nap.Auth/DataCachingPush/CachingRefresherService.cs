@@ -28,7 +28,7 @@ public class CachingRefresherServiceImp(DataBatchLoadingService repository, ICac
 {
     private const string CacheVersionKey = "NAP_API_CACHE_VERSION";
 
-    private readonly CacheItemOptions cacheOptions = new() { AbsoluteExpiration = DateTimeOffset.UtcNow.AddDays(7) };
+    private CacheItemOptions CacheOptions => new() { AbsoluteExpiration = DateTimeOffset.UtcNow.AddDays(7) };
 
     internal static class NapApiCacheKey
     {
@@ -55,7 +55,7 @@ public class CachingRefresherServiceImp(DataBatchLoadingService repository, ICac
     {
         get
         {
-            cache.TryGet<string>(NapApiCacheKey.CacheVersion, out var  cacheVersion);
+            cache.TryGet<string>(NapApiCacheKey.CacheVersion, out var cacheVersion);
             return cacheVersion;
         }
     }
@@ -75,7 +75,7 @@ public class CachingRefresherServiceImp(DataBatchLoadingService repository, ICac
     {
         var sites = await repository.GetSites();
 
-        await cache.SetAsync(NapApiCacheKey.Sites, sites, cacheOptions);
+        await cache.SetAsync(NapApiCacheKey.Sites, sites, CacheOptions);
         await SaveCacheVersion();
     }
 
@@ -83,7 +83,7 @@ public class CachingRefresherServiceImp(DataBatchLoadingService repository, ICac
     {
         var functionList = (await repository.GetFunctions()).Select(f => f.ToNonNullFunction())
             .ToList();
-        await cache.SetAsync(NapApiCacheKey.Functions, functionList, cacheOptions);
+        await cache.SetAsync(NapApiCacheKey.Functions, functionList, CacheOptions);
         await SaveCacheVersion();
     }
 
@@ -92,7 +92,7 @@ public class CachingRefresherServiceImp(DataBatchLoadingService repository, ICac
         var groupList = (await repository.GetGroups()).Select(u => u.ToNonNullGroup())
             .ToList();
 
-        await cache.SetAsync(NapApiCacheKey.Groups, groupList, cacheOptions);
+        await cache.SetAsync(NapApiCacheKey.Groups, groupList, CacheOptions);
         await SaveCacheVersion();
     }
 
@@ -100,7 +100,7 @@ public class CachingRefresherServiceImp(DataBatchLoadingService repository, ICac
     {
         var siteLevelList = await repository.GetUserSiteLevels();
 
-        await cache.SetAsync(NapApiCacheKey.UserSiteLevels, siteLevelList, cacheOptions);
+        await cache.SetAsync(NapApiCacheKey.UserSiteLevels, siteLevelList, CacheOptions);
         await SaveCacheVersion();
     }
 
@@ -111,7 +111,7 @@ public class CachingRefresherServiceImp(DataBatchLoadingService repository, ICac
             .ToDictionary(p => p.Key, p => p.ToList());
         foreach (var id in policiesBySite.Keys)
         {
-            await cache.SetAsync(NapApiCacheKey.UserFunctionPolicies + id, policiesBySite[id], cacheOptions);
+            await cache.SetAsync(NapApiCacheKey.UserFunctionPolicies + id, policiesBySite[id], CacheOptions);
         }
         await SaveCacheVersion();
     }
@@ -121,7 +121,7 @@ public class CachingRefresherServiceImp(DataBatchLoadingService repository, ICac
         var menuItems = (await repository.GetAllMenuItems())
             .Select(m => m.ToNonNullMenuItem())
             .ToList();
-        await cache.SetAsync(NapApiCacheKey.SiteMenuItems, menuItems, cacheOptions);
+        await cache.SetAsync(NapApiCacheKey.SiteMenuItems, menuItems, CacheOptions);
         await SaveCacheVersion();
     }
 
@@ -130,13 +130,13 @@ public class CachingRefresherServiceImp(DataBatchLoadingService repository, ICac
         var users = (await repository.GetAllUsers())
             .Select(u => u.ToNonNullUser())
             .ToList();
-        await cache.SetAsync(NapApiCacheKey.Users, users, cacheOptions);
+        await cache.SetAsync(NapApiCacheKey.Users, users, CacheOptions);
         await SaveCacheVersion();
     }
 
     private async Task SaveCacheVersion()
     {
         var version = $"{Guid.NewGuid()}-{DateTimeOffset.Now:yyyy-MM-dd-HH:mm:ss} - GMT+{DateTimeOffset.Now.Offset.Hours}";
-        await cache.SetAsync(CacheVersionKey, version, cacheOptions);
+        await cache.SetAsync(CacheVersionKey, version, CacheOptions);
     }
 }
