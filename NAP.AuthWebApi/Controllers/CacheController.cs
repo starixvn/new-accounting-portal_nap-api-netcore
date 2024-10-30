@@ -29,6 +29,11 @@ public class CacheController(CachingRefresherService dataCachingService, MemoryC
         var newCacheVersion = dataCachingService.CacheVersion;
 
         await logger.InfoAsync($"Reload Old: {oldCacheVersion} - New: {newCacheVersion} at {DateTimeOffset.Now}");
+        if (string.IsNullOrEmpty(newCacheVersion))
+        {
+            await logger.ErrorAsync("There is a cache issue in NAP API");
+        }
+
         return Content($"Old: {oldCacheVersion} - New: {newCacheVersion}");
     }
     
@@ -60,6 +65,11 @@ public class CacheController(CachingRefresherService dataCachingService, MemoryC
             default:
                 await Task.Delay(10);
                 break;
+        }
+
+        if (string.IsNullOrEmpty(dataCachingService.CacheVersion))
+        {
+            await logger.ErrorAsync("There is a cache issue in NAP API");
         }
 
         return dataCachingService.CacheVersion;
