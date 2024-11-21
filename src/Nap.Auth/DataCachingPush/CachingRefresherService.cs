@@ -2,33 +2,33 @@
 
 using Fanex.Caching;
 
-public interface CachingReloadService
+public interface CachingRefresherService
 {
-    Task ReloadSites();
+    Task RefreshSites();
 
-    Task ReloadAll();
+    Task RefreshAll();
 
-    Task ReloadFunctions();
+    Task RefreshFunctions();
 
-    Task ReloadGroups();
+    Task RefreshGroups();
 
-    Task ReloadUserSiteLevels();
+    Task RefreshUserSiteLevels();
 
-    Task ReloadUserFunctionPolicy(int siteId = 0);
+    Task RefreshUserFunctionPolicy(int siteId = 0);
 
-    Task ReloadSiteMenu();
+    Task RefreshSiteMenu();
 
-    Task ReloadUsers();
+    Task RefreshUsers();
 
     string CacheVersion { get; }
 }
 
 
-public class CachingReloadServiceImp(DataBatchLoadingService repository, ICache cache) : CachingReloadService
+public class CachingRefresherServiceImp(DataBatchLoadingService repository, ICache cache) : CachingRefresherService
 {
     private const string CacheVersionKey = "NAP_API_CACHE_VERSION";
 
-    private readonly CacheItemOptions cacheOptions = new() { AbsoluteExpiration = DateTimeOffset.UtcNow.AddDays(7) };
+    private CacheItemOptions CacheOptions => new() { AbsoluteExpiration = DateTimeOffset.UtcNow.AddDays(7) };
 
     internal static class NapApiCacheKey
     {
@@ -55,88 +55,88 @@ public class CachingReloadServiceImp(DataBatchLoadingService repository, ICache 
     {
         get
         {
-            cache.TryGet<string>(NapApiCacheKey.CacheVersion, out var  cacheVersion);
+            cache.TryGet<string>(NapApiCacheKey.CacheVersion, out var cacheVersion);
             return cacheVersion;
         }
     }
 
-    public async Task ReloadAll()
+    public async Task RefreshAll()
     {
-        await ReloadSites();
-        await ReloadFunctions();
-        await ReloadGroups();
-        await ReloadSiteMenu();
-        await ReloadUserSiteLevels();
-        await ReloadUserFunctionPolicy();
-        await ReloadUsers();
+        await RefreshSites();
+        await RefreshFunctions();
+        await RefreshGroups();
+        await RefreshSiteMenu();
+        await RefreshUserSiteLevels();
+        await RefreshUserFunctionPolicy();
+        await RefreshUsers();
     }
 
-    public async Task ReloadSites()
+    public async Task RefreshSites()
     {
         var sites = await repository.GetSites();
 
-        await cache.SetAsync(NapApiCacheKey.Sites, sites, cacheOptions);
+        await cache.SetAsync(NapApiCacheKey.Sites, sites, CacheOptions);
         await SaveCacheVersion();
     }
 
-    public async Task ReloadFunctions()
+    public async Task RefreshFunctions()
     {
         var functionList = (await repository.GetFunctions()).Select(f => f.ToNonNullFunction())
             .ToList();
-        await cache.SetAsync(NapApiCacheKey.Functions, functionList, cacheOptions);
+        await cache.SetAsync(NapApiCacheKey.Functions, functionList, CacheOptions);
         await SaveCacheVersion();
     }
 
-    public async Task ReloadGroups()
+    public async Task RefreshGroups()
     {
         var groupList = (await repository.GetGroups()).Select(u => u.ToNonNullGroup())
             .ToList();
 
-        await cache.SetAsync(NapApiCacheKey.Groups, groupList, cacheOptions);
+        await cache.SetAsync(NapApiCacheKey.Groups, groupList, CacheOptions);
         await SaveCacheVersion();
     }
 
-    public async Task ReloadUserSiteLevels()
+    public async Task RefreshUserSiteLevels()
     {
         var siteLevelList = await repository.GetUserSiteLevels();
 
-        await cache.SetAsync(NapApiCacheKey.UserSiteLevels, siteLevelList, cacheOptions);
+        await cache.SetAsync(NapApiCacheKey.UserSiteLevels, siteLevelList, CacheOptions);
         await SaveCacheVersion();
     }
 
-    public async Task ReloadUserFunctionPolicy(int siteId = 0)
+    public async Task RefreshUserFunctionPolicy(int siteId = 0)
     {
         var policies = await repository.GetUserFunctionPolicies(siteId);
         var policiesBySite = policies.GroupBy(p => p.SiteId)
             .ToDictionary(p => p.Key, p => p.ToList());
         foreach (var id in policiesBySite.Keys)
         {
-            await cache.SetAsync(NapApiCacheKey.UserFunctionPolicies + id, policiesBySite[id], cacheOptions);
+            await cache.SetAsync(NapApiCacheKey.UserFunctionPolicies + id, policiesBySite[id], CacheOptions);
         }
         await SaveCacheVersion();
     }
 
-    public async Task ReloadSiteMenu()
+    public async Task RefreshSiteMenu()
     {
         var menuItems = (await repository.GetAllMenuItems())
             .Select(m => m.ToNonNullMenuItem())
             .ToList();
-        await cache.SetAsync(NapApiCacheKey.SiteMenuItems, menuItems, cacheOptions);
+        await cache.SetAsync(NapApiCacheKey.SiteMenuItems, menuItems, CacheOptions);
         await SaveCacheVersion();
     }
 
-    public async Task ReloadUsers()
+    public async Task RefreshUsers()
     {
         var users = (await repository.GetAllUsers())
             .Select(u => u.ToNonNullUser())
             .ToList();
-        await cache.SetAsync(NapApiCacheKey.Users, users, cacheOptions);
+        await cache.SetAsync(NapApiCacheKey.Users, users, CacheOptions);
         await SaveCacheVersion();
     }
 
     private async Task SaveCacheVersion()
     {
-        var version = $"{Guid.NewGuid()}-{DateTimeOffset.Now.DateTime:yyyy-MM-dd-HH:mm:ss}";
-        await cache.SetAsync(CacheVersionKey, version, cacheOptions);
+        var version = $"{Guid.NewGuid()}-{DateTimeOffset.Now:yyyy-MM-dd-HH:mm:ss} - GMT+{DateTimeOffset.Now.Offset.Hours}";
+        await cache.SetAsync(CacheVersionKey, version, CacheOptions);
     }
 }

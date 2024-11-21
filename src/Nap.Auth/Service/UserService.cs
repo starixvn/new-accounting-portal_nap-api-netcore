@@ -2,13 +2,13 @@ using Fanex.Data.Repository;
 using Nap.Auth.Criteria.Trace;
 using Nap.Auth.Criteria.User;
 using Nap.Auth.Model;
-using ONEbook.OTP.Services;
 
 namespace Nap.Auth.Service;
 
 using System.Globalization;
 using DataCachingPull;
 using Microsoft.Extensions.Configuration;
+using ONEbook.OTP;
 using ONEbook.UM.Services;
 
 public interface UserService

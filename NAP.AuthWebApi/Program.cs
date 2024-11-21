@@ -1,12 +1,13 @@
 using System.Net.Mime;
+using Fanex.Caching.Redis;
 using Fanex.Data;
 using Fanex.Data.SqlServer;
 using Fanex.Logging;
 using Fanex.Logging.Extensions.Database;
+using Fanex.Logging.Sentry.RavenClient;
 using Microsoft.AspNetCore.Diagnostics;
 using NAP.AuthWebApi;
 using Newtonsoft.Json;
-
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -17,8 +18,9 @@ services.AddMemoryCache();
 services.AddMaintenance(configuration);
 services.AddCoreServices();
 services.AddFanexSql(configuration);
-services.AddFanexServices(configuration);
-services.AddFanexCaching(configuration);
+services.AddFanexLogSentry(configuration);
+services.AddExceptionHandler(configuration);
+services.AddRedisCache(configuration.GetSection("Fanex.Caching.Redis"));
 services.AddNapApiCachingServices();
 services.AddInternalServices();
 services.AddControllers();
