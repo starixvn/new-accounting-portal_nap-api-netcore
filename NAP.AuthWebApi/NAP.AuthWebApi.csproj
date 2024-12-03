@@ -8,9 +8,9 @@
 
   <ItemGroup>
     <PackageReference Include="Fanex.Caching.Redis" Version="2.2.6" />
-    <PackageReference Include="Fanex.Data" Version="4.3.0.4" />
-    <PackageReference Include="Fanex.Data.Repository" Version="4.3.0.4" />
-    <PackageReference Include="Fanex.Data.SqlServer" Version="4.3.0.4" />
+    <PackageReference Include="Fanex.Data" Version="4.3.1" />
+    <PackageReference Include="Fanex.Data.Repository" Version="4.3.1" />
+    <PackageReference Include="Fanex.Data.SqlServer" Version="4.3.1" />
     <PackageReference Include="Fanex.Logging.Extensions.AspNetCore" Version="1.1.0" />
     <PackageReference Include="Fanex.Logging.Extensions.Database" Version="1.1.0" />
     <PackageReference Include="Fanex.Logging.Sentry.RavenClient" Version="1.1.0" />
@@ -18,7 +18,7 @@
     <PackageReference Include="ONEbook.UM" Version="3.1.6" />
     <PackageReference Include="ONEbook.UM.AspNetCore" Version="3.1.1.1" />
     <PackageReference Include="ONEbook.UM.Transport" Version="3.1.2" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.1.0" />
   </ItemGroup>
 
   <ItemGroup>
