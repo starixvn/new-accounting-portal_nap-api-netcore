@@ -8,6 +8,7 @@ using Fanex.Logging.Sentry.RavenClient;
 using Microsoft.AspNetCore.Diagnostics;
 using NAP.AuthWebApi;
 using Newtonsoft.Json;
+using ONEbook.UM.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -15,7 +16,7 @@ var configuration = builder.Configuration;
 
 // Add services to the container.
 services.AddMemoryCache();
-services.AddMaintenance(configuration);
+services.AddOneBookUm(configuration);
 services.AddCoreServices();
 services.AddFanexSql(configuration);
 services.AddFanexLogSentry(configuration);

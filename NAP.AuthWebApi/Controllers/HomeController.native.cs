@@ -2,9 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace NAP.AuthWebApi.Controllers;
 
-using System.Diagnostics;
-using System.Runtime;
-using System.Text;
 using Fanex.Caching;
 using Microsoft.AspNetCore.Authorization;
 using Olympus.Diagnostic;
