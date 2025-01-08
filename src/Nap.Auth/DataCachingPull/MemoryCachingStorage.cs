@@ -1,8 +1,8 @@
 ﻿namespace Nap.Auth.DataCachingPull;
 
-using Nap.Auth.Business;
-using Nap.Auth.Model;
-using Nap.Auth.Model.ValueObject;
+using Business;
+using Model;
+using Model.ValueObject;
 
 public interface MemoryCachingStorage
 {

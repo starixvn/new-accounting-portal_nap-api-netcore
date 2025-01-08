@@ -1,7 +1,7 @@
 ﻿namespace Nap.Auth.DataCachingPull;
 
-using Nap.Auth.Model;
-using Nap.Auth.Model.ValueObject;
+using Model;
+using Model.ValueObject;
 
 public class BatchUserFunctionPolicy
 {

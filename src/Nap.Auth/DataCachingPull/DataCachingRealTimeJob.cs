@@ -3,7 +3,7 @@
 using Fanex.Caching;
 using Fanex.Logging;
 using Microsoft.Extensions.Hosting;
-using Nap.Auth.Model;
+using Model;
 
 public class DataCachingRealTimeJob(ICache cache, MemoryCachingStorage storage) : BackgroundService
 {
