@@ -10,12 +10,12 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Fanex.Caching.Redis" Version="2.2.8" />
-    <PackageReference Include="Fanex.Data" Version="4.3.2" />
-    <PackageReference Include="Fanex.Data.Repository" Version="4.3.2" />
+    <PackageReference Include="Fanex.Data" Version="4.3.3" />
+    <PackageReference Include="Fanex.Data.Repository" Version="4.3.3" />
     <PackageReference Include="Fanex.Logging" Version="2.0.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="ONEbook.OTP" Version="2.1.0" />
-    <PackageReference Include="ONEbook.UM" Version="3.2.0" />
+    <PackageReference Include="ONEbook.UM" Version="3.2.4" />
   </ItemGroup>
 
 </Project>
