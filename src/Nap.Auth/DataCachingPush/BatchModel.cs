@@ -143,6 +143,8 @@ public class BatchUser
 
     public int GroupId { get; set; }
 
+    public DateTime PasswordExpiry { get; set; }
+
     public BatchUser ToNonNullUser()
     {
         return new BatchUser
@@ -154,6 +156,7 @@ public class BatchUser
             Password = StringUtility.ToNonNull(Password),
             FirstName = StringUtility.ToNonNull(FirstName),
             LastName = StringUtility.ToNonNull(LastName),
+            PasswordExpiry = PasswordExpiry,
             Email = StringUtility.ToNonNull(Email)
         };
     }

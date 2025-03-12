@@ -20,6 +20,8 @@ public class UpdatePasswordCustomerCommand : NonQueryCommand
 
     public string ErrMsg { get; set; }
 
+    public DateTime PasswordExpiry { get; set; } = DateTimeOffset.Now.Date.AddMonths(1);
+
     public override string GetSettingKey()
     {
         return "NAP_Cust_UpdatePassword";

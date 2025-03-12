@@ -207,7 +207,7 @@ public class UserServiceImp(
 
     #region Update
 
-    public async Task<bool> ChangePasswordAsync(int siteId, int userId, string password, string loginIp)
+    public async Task<bool> ChangePasswordAsync(int siteId, int userId, string password,string loginIp)
     {
         var command = new UpdatePasswordCustomerCommand
         {
@@ -216,8 +216,8 @@ public class UserServiceImp(
             CurrentSiteId = siteId,
             LogDate = DateTimeOffset.Now.DateTime,
             UserPwd = password,
-            LoginIp = loginIp
-
+            LoginIp = loginIp,
+            PasswordExpiry = DateTimeOffset.Now.Date.AddMonths(1)
         };
 
         await repository.ExecuteAsync(command).ConfigureAwait(false);
