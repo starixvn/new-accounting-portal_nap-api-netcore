@@ -16,7 +16,7 @@ var configuration = builder.Configuration;
 
 // Add services to the container.
 services.AddMemoryCache();
-services.AddOneBookUm(configuration);
+services.AddOneBookUmForService(configuration);
 services.AddCoreServices();
 services.AddFanexSql(configuration);
 services.AddFanexLogSentry(configuration);

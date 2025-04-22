@@ -18,6 +18,8 @@ public class User
 
     public int GroupId { get; set; }
 
+    public DateTime PasswordExpiry { get; set; }
+
     public User ToNonNullUser()
     {
         return new User
@@ -29,6 +31,7 @@ public class User
             Password = StringUtility.ToNonNull(Password),
             FirstName = StringUtility.ToNonNull(FirstName),
             LastName = StringUtility.ToNonNull(LastName),
+            PasswordExpiry = PasswordExpiry,
             Email = StringUtility.ToNonNull(Email)
         };
     }
