@@ -25,6 +25,7 @@ services.AddRedisCache(configuration.GetSection("Fanex.Caching.Redis"));
 services.AddNapApiCachingServices();
 services.AddInternalServices();
 services.AddControllers();
+services.AddHealthChecks();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
@@ -58,5 +59,6 @@ app.UseExceptionHandler(exceptionHandlerApp =>
     });
 });
 app.MapControllers();
+app.MapHealthChecks("/healthz");
 
 await app.RunAsync();
